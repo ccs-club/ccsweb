@@ -46,12 +46,28 @@ export default function SiteHeader() {
 
       <nav className="main-nav" aria-label={t.nav.menu}>
         <Link
-          href={localizedHref("/#about", locale)}
+          href={localizedHref("/", locale)}
           onNavigate={onNavigate}
           className={pathname === "/" ? "is-active" : undefined}
           aria-current={pathname === "/" ? "page" : undefined}
         >
+          {t.nav.home}
+        </Link>
+        <Link
+          href={localizedHref("/about", locale)}
+          onNavigate={onNavigate}
+          className={pathname === "/about" ? "is-active" : undefined}
+          aria-current={pathname === "/about" ? "page" : undefined}
+        >
           {t.nav.about}
+        </Link>
+        <Link
+          href={localizedHref("/gallery", locale)}
+          onNavigate={onNavigate}
+          className={pathname === "/gallery" ? "is-active" : undefined}
+          aria-current={pathname === "/gallery" ? "page" : undefined}
+        >
+          {t.nav.gallery}
         </Link>
         <Link
           href={localizedHref("/events", locale)}
@@ -61,6 +77,14 @@ export default function SiteHeader() {
         >
           {t.nav.events}
         </Link>
+        <Link
+          href={localizedHref("/posts", locale)}
+          onNavigate={onNavigate}
+          className={pathname === "/posts" ? "is-active" : undefined}
+          aria-current={pathname === "/posts" ? "page" : undefined}
+        >
+          {t.nav.posts}
+        </Link>
       </nav>
 
       <div className="nav-actions">
@@ -68,7 +92,8 @@ export default function SiteHeader() {
       </div>
 
       <details className="mobile-nav">
-        <summary aria-label={t.nav.menu} title={t.nav.menu}>
+        <summary>
+          <span className="mobile-menu-label">{t.nav.menu}</span>
           <span className="mobile-menu-icon" aria-hidden="true">
             <i />
             <i />
@@ -76,8 +101,11 @@ export default function SiteHeader() {
           </span>
         </summary>
         <nav className="mobile-nav-panel" aria-label={t.nav.menu}>
-          <Link href={localizedHref("/#about", locale)} onNavigate={onNavigate}>{t.nav.about}</Link>
+          <Link href={localizedHref("/", locale)} onNavigate={onNavigate}>{t.nav.home}</Link>
+          <Link href={localizedHref("/about", locale)} onNavigate={onNavigate}>{t.nav.about}</Link>
+          <Link href={localizedHref("/gallery", locale)} onNavigate={onNavigate}>{t.nav.gallery}</Link>
           <Link href={localizedHref("/events", locale)} onNavigate={onNavigate}>{t.nav.events}</Link>
+          <Link href={localizedHref("/posts", locale)} onNavigate={onNavigate}>{t.nav.posts}</Link>
         </nav>
       </details>
     </header>

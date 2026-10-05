@@ -1,0 +1,15 @@
+[
+  {
+    "id": "regression-test-event",
+    "revision": 1,
+    "type": "other",
+    "title": "Regression test event",
+    "titleMn": "Туршилтын арга хэмжээ",
+    "summary": "Test fixture, not public content.",
+    "summaryMn": "Туршилтын мэдээлэл.",
+    "date": "2026-01-01",
+    "status": "ended",
+    "tags": [],
+    "featured": false
+  }
+]

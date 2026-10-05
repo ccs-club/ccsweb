@@ -23,8 +23,8 @@ const OFF = "rgba(255, 255, 255, 0.04)";
 const KEEP = 0.58;
 const KEEP_EDGE = 0.9;
 const DOT_TIME_SCALE = 0.1;
-const CIRCUIT_BASE = 0.09;
-const CIRCUIT_PULSE = 0.24;
+const CIRCUIT_BASE = 0.28;
+const CIRCUIT_PULSE = 0.92;
 
 function makeCircuit(image: HTMLImageElement): Circuit | null {
   const width = image.naturalWidth;

@@ -3,8 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/events": ["./data/events.json"],
-    "/admin": ["./data/events.json"],
+    "/posts": ["./data/facebook-posts.json"],
+    "/admin": ["./data/events.json", "./data/facebook-posts.json"],
     "/api/admin/events": ["./data/events.json"],
+    "/api/admin/facebook-posts": ["./data/facebook-posts.json"],
+    "/api/facebook-post-image/[id]": ["./data/facebook-posts.json"],
   },
   async headers() {
     return [

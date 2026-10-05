@@ -7,10 +7,14 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:gallery && next build",
+    "check:gallery": "node scripts/check-gallery.mjs",
+    "gallery:build": "node scripts/build-gallery.mjs",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:e2e": "npm run build && playwright test",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "next": "16.3.6",
@@ -18,13 +22,14 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
-    "tailwindcss": "^4",
+    "sharp": "^0.34.5",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

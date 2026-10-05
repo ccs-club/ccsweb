@@ -119,3 +119,10 @@ The old club homepage confirms the current program descriptions and contact phon
 **Verification:** `npm run typecheck`, `npm run lint`, and `npm run build` passed. Against an isolated temporary event file, create/update succeeded, deletion with an older revision returned `409` and preserved the event, and deletion with the current revision succeeded. The admin UI displayed the Mongolian unsaved-draft warning and retained the draft after dismissal. Browser checks confirmed the `www` host in sitemap/robots and no horizontal overflow on the populated events page at a 341px CSS viewport; all five event covers loaded after scrolling. Temporary event data was removed; the repository's eight event records remained.
 
 **Still outside this source audit:** production proxy/storage behavior and current club-drive photos for events without covers.
+
+## 2026-09-29 follow-up
+
+The current [official CCS homepage](https://www.sict-ccs.club/) lists the public
+phone numbers as 8068 3288 and 9555 8915. The footer had displayed different
+numbers from the destinations in its `tel:` links; its labels now match those
+destinations. Chromium confirmed both rendered labels and links agree.

@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import type { Dictionary, Locale } from "@/app/i18n";
 import { useLocale } from "@/app/locale-provider";
 import { useUnsavedChanges } from "@/app/unsaved-changes";
+import FacebookPostManager from "./facebook-post-manager";
 import {
   EVENT_STATUSES,
   EVENT_TYPES,
@@ -12,6 +13,11 @@ import {
   type EventStatus,
   type EventType,
 } from "@/lib/event-types";
+import { sortEvents } from "@/lib/event-types";
+import {
+  normalizeFacebookPost,
+  type FacebookPost,
+} from "@/lib/facebook-post-types";
 
 const EMPTY_DRAFT: EventDraft = {
   type: "other",
@@ -75,6 +81,14 @@ async function readResponse(response: Response): Promise<Record<string, unknown>
   }
 }
 
+function readFacebookPosts(value: unknown): FacebookPost[] | null {
+  if (!Array.isArray(value)) return null;
+  const posts = value.map(normalizeFacebookPost);
+  return posts.every((post): post is FacebookPost => post !== null)
+    ? posts
+    : null;
+}
+
 function parseTagInput(value: string): string[] {
   return value
     .split(",")
@@ -86,32 +100,26 @@ function serializeDraft(draft: EventDraft, tagsInput: string): string {
   return JSON.stringify({ ...draft, tags: parseTagInput(tagsInput) });
 }
 
-function sortEventList(events: Event[]): Event[] {
-  const statusOrder: Record<EventStatus, number> = {
-    upcoming: 0,
-    ongoing: 1,
-    ended: 2,
-  };
-  return [...events].sort((a, b) => {
-    const statusDifference = statusOrder[a.status] - statusOrder[b.status];
-    if (statusDifference !== 0) return statusDifference;
-    const dateDifference = a.date.localeCompare(b.date);
-    return a.status === "ended" ? -dateDifference : dateDifference;
-  });
-}
-
 function LoginPanel({
   configured,
   dictionary,
   locale,
+  notice,
+  onAuthenticated,
 }: {
   configured: boolean;
   dictionary: AdminDictionary;
   locale: Locale;
+  notice?: string;
+  onAuthenticated: () => Promise<void>;
 }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (notice) document.getElementById("admin-password")?.focus();
+  }, [notice]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -133,7 +141,8 @@ function LoginPanel({
         setError(apiErrorMessage(response.status, body, locale, dictionary, "login"));
         return;
       }
-      window.location.reload();
+      setPassword("");
+      await onAuthenticated();
     } catch {
       setError(dictionary.error);
     } finally {
@@ -144,11 +153,12 @@ function LoginPanel({
   return (
     <section className="admin-login-card" aria-labelledby="admin-login-title">
       <div className="section-label">
-        <span>ADMIN</span>
+        <span>{dictionary.eyebrow}</span>
         <span>{dictionary.privateLabel}</span>
       </div>
       <h1 id="admin-login-title">{dictionary.loginTitle}</h1>
       <p>{dictionary.loginBody}</p>
+      {notice ? <p id="admin-session-notice" className="admin-notice" role="status">{notice}</p> : null}
       {!configured ? (
         <div className="admin-config-note" role="note">
           <strong>{dictionary.notConfiguredTitle}</strong>
@@ -171,6 +181,7 @@ function LoginPanel({
               name="password"
               type="password"
               autoComplete="current-password"
+              aria-describedby={notice ? "admin-session-notice" : undefined}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
@@ -459,11 +470,16 @@ function EventForm({
           {busy ? dictionary.saving : dictionary.save}
         </button>
         {editing ? (
-          <button className="button button-quiet" type="button" onClick={onCancel}>
+          <button
+            className="button button-quiet"
+            type="button"
+            onClick={onCancel}
+            disabled={busy}
+          >
             {dictionary.cancel}
           </button>
         ) : null}
-        </div>
+      </div>
       </fieldset>
     </form>
   );
@@ -471,17 +487,23 @@ function EventForm({
 
 export default function AdminClient({
   initialEvents,
+  initialFacebookPosts,
   initialAuthenticated,
   configured,
+  facebookConfigured,
 }: {
   initialEvents: Event[];
+  initialFacebookPosts: FacebookPost[];
   initialAuthenticated: boolean;
   configured: boolean;
+  facebookConfigured: boolean;
 }) {
   const { dictionary: t, locale } = useLocale();
   const { setHasUnsavedChanges } = useUnsavedChanges();
   const [authenticated, setAuthenticated] = useState(initialAuthenticated);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [events, setEvents] = useState(initialEvents);
+  const [facebookPosts, setFacebookPosts] = useState(initialFacebookPosts);
   const [draft, setDraft] = useState<EventDraft>(freshDraft);
   const [tagsInput, setTagsInput] = useState("");
   const [initialDraftSnapshot, setInitialDraftSnapshot] = useState(() =>
@@ -495,14 +517,22 @@ export default function AdminClient({
   const hasUnsavedChanges =
     serializeDraft(draft, tagsInput) !== initialDraftSnapshot;
 
+  const expireSession = useCallback(() => {
+    setAuthenticated(false);
+    setSessionExpired(true);
+    setError("");
+    setMessage("");
+    setConflictEventId(null);
+  }, []);
+
   useEffect(() => {
-    setHasUnsavedChanges(authenticated && hasUnsavedChanges);
-  }, [authenticated, hasUnsavedChanges, setHasUnsavedChanges]);
+    setHasUnsavedChanges(hasUnsavedChanges);
+  }, [hasUnsavedChanges, setHasUnsavedChanges]);
 
   useEffect(() => () => setHasUnsavedChanges(false), [setHasUnsavedChanges]);
 
   useEffect(() => {
-    if (!authenticated || !hasUnsavedChanges) return;
+    if (!hasUnsavedChanges) return;
 
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
@@ -510,10 +540,34 @@ export default function AdminClient({
     };
     window.addEventListener("beforeunload", warnBeforeUnload);
     return () => window.removeEventListener("beforeunload", warnBeforeUnload);
-  }, [authenticated, hasUnsavedChanges]);
+  }, [hasUnsavedChanges]);
 
   if (!authenticated) {
-    return <LoginPanel configured={configured} dictionary={t.admin} locale={locale} />;
+    return (
+      <LoginPanel
+        configured={configured}
+        dictionary={t.admin}
+        locale={locale}
+        notice={
+          sessionExpired
+            ? hasUnsavedChanges ? t.admin.sessionExpiredDraft : t.admin.sessionExpired
+            : undefined
+        }
+        onAuthenticated={resumeSession}
+      />
+    );
+  }
+
+  async function resumeSession() {
+    setSessionExpired(false);
+    setAuthenticated(true);
+    setError("");
+    setMessage("");
+    const [synced] = await Promise.all([syncEvents(), syncFacebookPosts()]);
+    if (!synced) setError(t.admin.storeUnavailable);
+    window.requestAnimationFrame(() => {
+      document.getElementById("event-title")?.focus();
+    });
   }
 
   function clearForm() {
@@ -553,14 +607,31 @@ export default function AdminClient({
     try {
       const response = await fetch("/api/admin/events", { cache: "no-store" });
       if (response.status === 401) {
-        setAuthenticated(false);
+        expireSession();
         return null;
       }
       const body = await readResponse(response);
       if (!response.ok || !Array.isArray(body.events)) return null;
-      const nextEvents = sortEventList(body.events as Event[]);
+      const nextEvents = sortEvents(body.events as Event[]);
       setEvents(nextEvents);
       return nextEvents;
+    } catch {
+      return null;
+    }
+  }
+
+  async function syncFacebookPosts(): Promise<FacebookPost[] | null> {
+    try {
+      const response = await fetch("/api/admin/facebook-posts", { cache: "no-store" });
+      if (response.status === 401) {
+        expireSession();
+        return null;
+      }
+      const body = await readResponse(response);
+      const posts = readFacebookPosts(body.selectedPosts);
+      if (!response.ok || !posts) return null;
+      setFacebookPosts(posts);
+      return posts;
     } catch {
       return null;
     }
@@ -591,6 +662,10 @@ export default function AdminClient({
       });
       const body = await readResponse(response);
       if (!response.ok) {
+        if (response.status === 401) {
+          expireSession();
+          return;
+        }
         if (response.status === 409) {
           await syncEvents();
           setError(t.admin.conflict);
@@ -608,7 +683,7 @@ export default function AdminClient({
       }
 
       setEvents((current) =>
-        sortEventList(
+        sortEvents(
           editing
             ? current.map((item) =>
                 item.id === savedEvent.id ? savedEvent : item,
@@ -646,6 +721,10 @@ export default function AdminClient({
       });
       const body = await readResponse(response);
       if (!response.ok || body.deleted !== true) {
+        if (response.status === 401) {
+          expireSession();
+          return;
+        }
         if (response.status === 409) {
           await syncEvents();
           setError(t.admin.conflict);
@@ -702,8 +781,12 @@ export default function AdminClient({
         setError(t.admin.error);
         return;
       }
+      clearForm();
+      setSessionExpired(false);
+      setMessage("");
       setAuthenticated(false);
       setEvents([]);
+      setFacebookPosts([]);
     } catch {
       setError(t.admin.error);
     }
@@ -714,7 +797,7 @@ export default function AdminClient({
       <div className="admin-dashboard-header">
         <div>
           <div className="section-label">
-            <span>ADMIN</span>
+            <span>{t.admin.eyebrow}</span>
             <span>{t.admin.privateLabel}</span>
           </div>
           <h1>{t.admin.title}</h1>
@@ -811,6 +894,13 @@ export default function AdminClient({
           />
         </section>
       </div>
+
+      <FacebookPostManager
+        selectedPosts={facebookPosts}
+        initialConfigured={facebookConfigured}
+        onSelectedPostsChange={setFacebookPosts}
+        onSessionExpired={expireSession}
+      />
     </div>
   );
 }

@@ -33,10 +33,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistMono.variable} h-full antialiased`}
+      className={geistMono.variable}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <div className="background-wash" aria-hidden="true" />
+        {/* Error and loading boundaries render outside each page's own
+            provider, so the layout one is their locale fallback. */}
         <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>

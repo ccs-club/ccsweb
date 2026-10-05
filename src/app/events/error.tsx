@@ -1,20 +1,17 @@
 "use client";
 
-import SiteHeader from "@/app/site-header";
+import PageState from "@/app/page-state";
 import { useLocale } from "@/app/locale-provider";
 
-export default function EventsError({ reset }: { reset: () => void }) {
+export default function EventsError({ retry }: { retry: () => void }) {
   const { dictionary: t } = useLocale();
   return (
-    <div className="site-shell">
-      <SiteHeader />
-      <main id="main-content" className="events-state section-wrap" role="alert">
-        <h1>{t.events.errorTitle}</h1>
-        <p>{t.events.errorBody}</p>
-        <button className="button button-primary" type="button" onClick={reset}>
-          {t.events.tryAgain}
-        </button>
-      </main>
-    </div>
+    <PageState
+      role="alert"
+      title={t.events.errorTitle}
+      body={t.events.errorBody}
+      action={t.events.tryAgain}
+      onAction={retry}
+    />
   );
 }

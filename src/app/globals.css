@@ -1,6 +1,4 @@
-@import "tailwindcss";
-
-/* ── Design tokens lifted from the reference ───────────────────────── */
+/* Design tokens lifted from the reference */
 :root {
   --bg: #0a0a0a;
   --surface: #141414;
@@ -12,17 +10,15 @@
   --fg-4: #8c8c8c;
   --line: rgba(255, 255, 255, 0.1);
   --control-border: #626262;
+  /* Boundary colour for controls a user has to identify by their edge. 3.2:1 on
+     `--surface-2` and better on every other surface, against the 1.2:1 that
+     `--line` composites to. WCAG 1.4.11 asks for 3:1 on the boundary, and a
+     hairline tint is not a boundary. */
+  --line-strong: #6b6b6b;
   --line-2: rgba(255, 255, 255, 0.06);
   --green: #00c950;
   --radius: 14px;
   --shell: 1180px;
-}
-
-@theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--fg);
-  --font-sans: var(--font-geist-mono);
-  --font-mono: var(--font-geist-mono);
 }
 
 * {
@@ -38,19 +34,38 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 88px;
   scroll-padding-bottom: 24px;
+  height: 100%;
   background: var(--bg);
+  color-scheme: dark;
+  overflow-x: clip;
+  /* Base measure the whole page inherits; every explicit line-height in this
+     sheet was authored against it. */
+  line-height: 1.5;
 }
 
 body {
   margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   -webkit-font-smoothing: antialiased;
-  /* Load-bearing: the shield is deliberately wider than the viewport and
-     centred with a -50% translate, so this clip is what keeps the decorative
-     overflow from producing a horizontal scrollbar. */
+  /* Keep oversized hero artwork from creating a horizontal scrollbar. */
   overflow-x: hidden;
+}
+
+/* Visually hidden, still announced to screen readers (year event counts). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* The page is not flat black. A very slow, very low-contrast wash of the
@@ -121,12 +136,15 @@ body {
   top: 8px;
   left: 12px;
   z-index: 100;
-  padding: 10px 14px;
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0 16px;
+  align-items: center;
   transform: translateY(-160%);
   border-radius: 6px;
   background: var(--green);
   color: #04120a;
-  font-size: 12px;
+  font-size: 14px;
   text-decoration: none;
   transition: transform 160ms ease;
 }
@@ -135,7 +153,7 @@ body {
   transform: translateY(0);
 }
 
-/* ── Header ───────────────────────────────────────────────────────── */
+/* Header */
 .site-header {
   position: sticky;
   top: 0;
@@ -152,6 +170,7 @@ body {
 
 .brand {
   display: flex;
+  min-height: 44px;
   align-items: center;
   gap: 11px;
   text-decoration: none;
@@ -172,9 +191,9 @@ body {
 }
 
 .brand-copy small {
-  font-size: 8.5px;
+  font-size: 12px;
   color: var(--fg-4);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
 }
 
 .main-nav {
@@ -184,25 +203,25 @@ body {
   margin-left: auto;
 }
 
+/* 44px at every width, not only below the mobile breakpoint. A tablet or a
+   landscape phone sits above 640px and still gets tapped, and the header is
+   64px tall so the target fits without growing it. */
 .main-nav a {
-  padding: 7px 14px;
-  border-radius: 999px;
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0 14px;
+  align-items: center;
   color: var(--fg-3);
-  font-size: 12.5px;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
-  transition: color 160ms ease, background 160ms ease;
+  transition: color 160ms ease;
 }
 
-.main-nav a:hover {
-  color: var(--fg);
-  background: var(--surface-2);
-}
-
+.main-nav a:hover,
 .main-nav a.is-active,
 .main-nav a[aria-current="page"] {
   color: var(--fg);
-  background: var(--surface-2);
 }
 
 .nav-actions {
@@ -212,27 +231,28 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Language toggle ──────────────────────────────────────────────── */
+/* Language toggle */
 .locale-toggle {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 4px 3px 8px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
   color: var(--fg-4);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .locale-toggle button {
-  padding: 3px 7px;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  align-items: center;
+  justify-content: center;
   border: 0;
-  border-radius: 999px;
   background: transparent;
   color: var(--fg-4);
   font: inherit;
   cursor: pointer;
-  transition: color 150ms ease, background 150ms ease;
+  transition: color 150ms ease;
 }
 
 .locale-toggle button:hover {
@@ -240,7 +260,6 @@ body {
 }
 
 .locale-toggle button.is-active {
-  background: var(--surface-3);
   color: var(--fg);
 }
 
@@ -257,7 +276,28 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Hero ─────────────────────────────────────────────────────────── */
+/* Home shell */
+/* The home page is one screen. The hero is sized to the viewport that is left
+   under the sticky header, so `home-shell` can pin itself to exactly that
+   height and clip rather than grow a scrollbar on short or zoomed viewports.
+   Every other page scrolls normally: only the home route sets this. */
+.home-shell {
+  height: calc(100svh - 64px);
+  overflow: hidden;
+}
+
+.home-shell main {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.home-shell .hero {
+  min-height: 0;
+  flex: 1;
+}
+
+/* Hero */
 .hero {
   position: relative;
   min-height: calc(100svh - 64px);
@@ -280,11 +320,34 @@ body {
   pointer-events: none;
 }
 
+/* Protect copy without erasing the shield pulse behind it. */
 .hero-content {
   position: relative;
   z-index: 3;
   width: min(100%, 860px);
   text-align: center;
+}
+
+.hero-content::before {
+  content: "";
+  position: absolute;
+  inset: -24px -20px;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(10, 10, 10, 0.55) 20px,
+    rgba(10, 10, 10, 0.55) calc(100% - 20px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent
+  );
 }
 
 .section-label {
@@ -293,9 +356,8 @@ body {
   gap: 10px;
   margin: 0;
   color: var(--fg-4);
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.06em;
 }
 
 .hero h1 {
@@ -320,7 +382,7 @@ body {
   /* Brighter than the section-body grey: this text sits directly over the
      shield, not on empty black, so it needs the extra headroom. */
   color: var(--fg-2);
-  font-size: 14.5px;
+  font-size: 16px;
   line-height: 1.7;
 }
 
@@ -332,6 +394,36 @@ body {
   flex-wrap: wrap;
 }
 
+/* Three sourced facts under the calls to action give the single-screen hero
+   the club's scale in ordinary language rather than field labels. */
+.hero-facts {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  margin: 22px auto 0;
+  padding: 0;
+  gap: 12px 24px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+.hero-facts li {
+  min-width: 0;
+  color: var(--fg-2);
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.hero-facts strong {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
 .button {
   display: inline-flex;
   height: 44px;
@@ -339,10 +431,15 @@ body {
   align-items: center;
   gap: 9px;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 14.5px;
   text-decoration: none;
   transition: background 170ms ease, color 170ms ease, border-color 170ms ease;
+}
+
+.home-shell .hero-actions .button-quiet,
+.join-inner .hero-actions .button-primary {
+  border-radius: 999px;
 }
 
 .button-primary {
@@ -356,58 +453,44 @@ body {
   color: #04120a;
 }
 
+/* The quiet button has no other way to read as a button: its label is text and
+   its fill is 1.16:1 on the page, so the border is what identifies it. */
 .button-quiet {
+  border-color: var(--line-strong);
   background: var(--surface-2);
   color: var(--fg-2);
 }
 
 .button-quiet:hover {
-  border-color: var(--line);
+  border-color: var(--line-strong);
   color: var(--fg);
   background: var(--surface-3);
 }
 
-.hero-footnote {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  display: flex;
-  padding: 0 32px 26px;
-  align-items: center;
-  /* One child only now that the eyebrow is gone, so it is centred rather
-     than spread by space-between across an empty row. */
-  justify-content: center;
-  color: var(--fg-4);
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
+/* Page hero. The about page and the events page share this shape. */
+.page-hero {
+  padding-top: 56px;
+  padding-bottom: 40px;
 }
 
-.hero-footnote a {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--fg-4);
-  text-decoration: none;
-  letter-spacing: 0.2em;
-  transition: color 160ms ease;
+.page-hero h1 {
+  max-width: 820px;
+  margin: 30px 0 0;
+  font-size: clamp(34px, 6vw, 68px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
 }
 
-.hero-footnote a:hover {
-  color: var(--fg);
+.page-hero > p {
+  max-width: 590px;
+  margin: 24px 0 0;
+  color: var(--fg-3);
+  font-size: 17px;
+  line-height: 1.75;
 }
 
-.scroll-mark {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-}
-
-/* ── Sections ─────────────────────────────────────────────────────── */
+/* Sections */
 main {
   position: relative;
   z-index: 1;
@@ -416,8 +499,20 @@ main {
 .about-section,
 .programs-section {
   position: relative;
-  padding: 130px 0;
-  border-top: 1px solid var(--line-2);
+  padding: 56px 0;
+}
+
+/* The founding statement opens directly on the hero, so the two blocks read
+   as one opening rather than two separate bands. */
+.page-hero + .about-section {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* The space moves inside the copy block, so the statement still breathes
+   below the hero without a separating rule. */
+.page-hero + .about-section .about-copy {
+  margin-top: 32px;
 }
 
 .section-label {
@@ -433,7 +528,7 @@ main {
 .about-copy {
   display: grid;
   margin-top: 30px;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 56px;
   align-items: start;
 }
@@ -455,17 +550,19 @@ main {
 .about-details p {
   margin: 0 0 18px;
   color: var(--fg-3);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.8;
 }
 
+/* The accent label reads as part of the paragraph, but it is still a control,
+   so it gets a target rather than just its text. */
 .text-link {
   display: inline-flex;
-  margin-top: 6px;
+  min-height: 44px;
   align-items: center;
   gap: 8px;
   color: var(--fg);
-  font-size: 13px;
+  font-size: 14.5px;
   text-decoration: none;
   border-bottom: 1px solid var(--line);
   padding-bottom: 4px;
@@ -478,7 +575,7 @@ main {
 
 .stats-grid {
   display: grid;
-  margin-top: 76px;
+  margin-top: 36px;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
   border: 1px solid var(--line-2);
@@ -488,7 +585,7 @@ main {
 }
 
 .stat {
-  padding: 30px 26px;
+  padding: 20px 26px;
   background: var(--bg);
   transition: background 200ms ease;
 }
@@ -508,17 +605,365 @@ main {
   display: block;
   margin-top: 8px;
   color: var(--fg-4);
-  font-size: 11.5px;
+  font-size: 13px;
   letter-spacing: 0.08em;
 }
 
-/* ── Programs ─────────────────────────────────────────────────────── */
+/* Gallery */
+/* The only place the site shows the club rather than describing it, so the
+   ground stays dark behind the photographs and the accent stays for text. */
+.gallery-section {
+  position: relative;
+  padding: 118px 0;
+  overflow: hidden;
+}
+
+/* One low-contrast green bloom, matching the page's existing depth treatment,
+   so the band reads as part of the same surface. */
+.gallery-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 46% at 50% 0%,
+    rgba(0, 201, 80, 0.06),
+    transparent 68%
+  );
+}
+
+.gallery-inner {
+  position: relative;
+}
+
+.gallery-section-about {
+  padding: 56px 0;
+}
+
+/* Keep the About selection beside its introduction, not as another archive. */
+@media (min-width: 941px) {
+  .gallery-section-about .gallery-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-rows: min-content 1fr;
+    column-gap: 56px;
+    align-items: start;
+  }
+
+  .gallery-section-about .gallery-heading {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .gallery-section-about .gallery-grid {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+  }
+
+  .gallery-section-about .gallery-cell:not(.gallery-cell-lead) {
+    flex-basis: 200px;
+  }
+
+  .gallery-section-about .gallery-more {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    margin-top: 28px;
+  }
+}
+
+/* On its own page the gallery is the whole page, so it carries the top space
+   itself instead of inheriting the section band that follows `/about`. */
+.gallery-section-page {
+  padding-top: 112px;
+  border-top: 0;
+  background: var(--bg);
+}
+
+.gallery-heading-page h1 {
+  max-width: 820px;
+  margin: 30px 0 0;
+  font-size: clamp(34px, 6vw, 68px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+
+.gallery-heading-page > p {
+  max-width: 590px;
+  margin: 24px 0 0;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.gallery-heading h2 {
+  max-width: 720px;
+  margin: 30px 0 0;
+  font-size: clamp(28px, 4.4vw, 50px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+
+.gallery-heading > p {
+  max-width: 580px;
+  margin: 20px 0 0;
+  color: var(--fg-3);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* The section label already carries the accent, so the count sits beside it in
+   the muted grey rather than as a second green element. */
+.gallery-total {
+  color: var(--fg-4);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* Flex rather than grid, so the last row grows to fill instead of leaving a
+   hole. With 18 photographs a 3-column grid ended on two tiles and an empty
+   cell, and the same thing returns the moment a photo is added. `flex: 1 1
+   300px` lets a short final row share the width evenly, and the basis is a
+   floor, not a fixed track, so the count can change without a CSS edit. */
+.gallery-grid {
+  display: flex;
+  margin: 60px 0 0;
+  padding: 0;
+  flex-wrap: wrap;
+  gap: 16px;
+  list-style: none;
+}
+
+.gallery-cell {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 300px;
+}
+
+.gallery-cell-lead {
+  /* The lead photograph takes the full width of the band, which gives the grid
+     a clear first read instead of eighteen equal tiles. */
+  flex: 1 1 100%;
+}
+
+/* The tile is the button, so its whole area is the target and the focus ring
+   wraps the photograph rather than sitting on a small inner element. */
+.gallery-tile {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  transition: border-color 200ms ease;
+}
+
+.gallery-tile:hover {
+  border-color: rgba(0, 201, 80, 0.45);
+}
+
+.gallery-tile img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  /* Held slightly desaturated so the photographs sit inside the palette rather
+     than on top of it. */
+  filter: saturate(0.82);
+  transition: filter 220ms ease;
+}
+
+.gallery-cell-lead .gallery-tile img {
+  aspect-ratio: 16 / 9;
+}
+
+.gallery-tile:hover img,
+.gallery-tile:focus-visible img {
+  filter: saturate(1);
+}
+
+.gallery-tile-caption {
+  display: block;
+  padding: 12px 14px 13px;
+  color: var(--fg-4);
+  font-size: 12.5px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.gallery-cell-lead .gallery-tile-caption {
+  padding: 14px 16px 15px;
+  font-size: 13px;
+}
+
+/* The missing-photo box is reserved by `aspect-ratio` and filled, so nothing
+   shifts; a failure shows the label, never a broken image. */
+.gallery-tile-missing {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 20px;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--fg-4);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.gallery-tile-missing.is-lead {
+  aspect-ratio: 16 / 9;
+}
+
+/* The link that hands the reader the rest of the set. Sits under the grid rather
+   than in the heading so the band reads as complete on its own and this reads as
+   the next step rather than a prerequisite. */
+.gallery-more {
+  margin-top: 44px;
+}
+
+.gallery-empty {
+  margin: 60px 0 0;
+  padding: 40px 24px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--fg-3);
+  font-size: 13px;
+  line-height: 1.75;
+  text-align: center;
+}
+
+/* Gallery viewer */
+/* `margin: auto` is what centres a modal dialog. The user-agent stylesheet sets
+   it, and Tailwind's preflight resets every margin to zero, so without this the
+   dialog opens pinned to the top left corner. */
+.gallery-viewer {
+  width: min(1180px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100svh - 40px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.gallery-viewer::backdrop {
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(4px);
+}
+
+.gallery-viewer-inner {
+  display: flex;
+  max-height: calc(100svh - 40px);
+  flex-direction: column;
+}
+
+.gallery-viewer-stage {
+  display: grid;
+  min-height: 0;
+  padding: 20px;
+  flex: 1;
+  place-items: center;
+  background: #050505;
+}
+
+/* `height: auto` alongside the max-height is what keeps the photograph from
+   stretching when it is taller than the stage. */
+.gallery-viewer-image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100svh - 150px);
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.gallery-viewer-bar {
+  display: flex;
+  padding: 12px 14px;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.gallery-viewer-missing {
+  margin: 0;
+  padding: 40px 24px;
+  color: var(--fg-4);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.gallery-viewer-caption {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  gap: 14px;
+  align-items: baseline;
+  color: var(--fg-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.gallery-viewer-count {
+  flex-shrink: 0;
+  color: var(--fg-4);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gallery-viewer-controls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.gallery-viewer-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.gallery-viewer-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.gallery-viewer-button:hover {
+  border-color: var(--green);
+  background: var(--surface-3);
+  color: var(--fg);
+}
+
+/* Programs */
 .programs-heading h2 {
   margin-top: 30px;
 }
 
 .program-list {
-  margin-top: 56px;
+  margin-top: 32px;
   border: 1px solid var(--line-2);
   border-radius: var(--radius);
   overflow: hidden;
@@ -529,7 +974,7 @@ main {
 
 .program-card {
   display: grid;
-  padding: 34px 30px;
+  padding: 24px 24px;
   grid-template-columns: 54px 1fr 44px;
   gap: 20px;
   align-items: start;
@@ -539,8 +984,12 @@ main {
   transition: background 200ms ease;
 }
 
-.program-card:hover {
+a.program-card:hover {
   background: var(--surface);
+}
+
+.program-card-static {
+  grid-template-columns: 54px minmax(0, 1fr);
 }
 
 .program-number {
@@ -551,23 +1000,24 @@ main {
 
 .program-type {
   color: var(--fg-4);
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
+  font-size: 12px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .program-copy h3 {
   margin: 12px 0 0;
   font-size: 27px;
+  line-height: 1.15;
   font-weight: 400;
   letter-spacing: 0.01em;
 }
 
 .program-copy p {
-  max-width: 620px;
+  max-width: 640px;
   margin: 12px 0 0;
   color: var(--fg-3);
-  font-size: 13.5px;
+  font-size: 15.5px;
   line-height: 1.75;
 }
 
@@ -577,7 +1027,7 @@ main {
   height: 38px;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 50%;
+  border-radius: 6px;
   color: var(--fg-3);
   transition: border-color 180ms ease, color 180ms ease, background 180ms ease;
 }
@@ -588,20 +1038,16 @@ main {
   color: #04120a;
 }
 
-/* ── Join ─────────────────────────────────────────────────────────── */
-/* The closing ask gets the most room on the page. It is the one section
-   whose job is to be read, so it is scaled up rather than matched to the
-   sections above it. */
+/* Join */
 .join-section {
   position: relative;
   overflow: hidden;
-  border-top: 1px solid var(--line-2);
-  background: var(--surface);
 }
 
+/* Large type, rather than extra padding, marks the closing invitation. */
 .join-inner {
-  padding-top: 180px;
-  padding-bottom: 180px;
+  padding-top: 56px;
+  padding-bottom: 56px;
   text-align: center;
 }
 
@@ -620,24 +1066,30 @@ main {
 
 .join-inner > p {
   max-width: 580px;
-  margin: 28px auto 0;
+  margin: 22px auto 0;
   color: var(--fg-3);
-  font-size: 15.5px;
+  font-size: 17px;
   line-height: 1.75;
 }
 
 .join-inner .hero-actions {
-  margin-top: 42px;
+  margin-top: 32px;
   gap: 14px;
 }
 
 .join-inner .hero-actions .button {
   height: 52px;
   padding: 0 30px;
+  font-size: 15px;
+}
+
+.join-coming-soon {
+  align-self: center;
+  color: var(--fg-3);
   font-size: 14px;
 }
 
-/* ── Footer ───────────────────────────────────────────────────────── */
+/* Footer */
 /* The last thing a visitor reads, so it is scaled above the body rather than
    shrunk below it: bigger type, larger logo, and room to breathe. */
 .site-footer {
@@ -647,7 +1099,7 @@ main {
   border-top: 1px solid var(--line-2);
   background: var(--bg);
   color: var(--fg-4);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .footer-grid {
@@ -663,7 +1115,7 @@ main {
   max-width: 340px;
   margin: 20px 0 0;
   color: var(--fg-4);
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.8;
   letter-spacing: 0.1em;
 }
@@ -677,9 +1129,9 @@ main {
 .footer-heading {
   margin: 0;
   color: var(--fg-4);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.06em;
 }
 
 .footer-contact-links {
@@ -691,15 +1143,21 @@ main {
 .footer-contact-links a,
 .footer-social-links a {
   display: inline-flex;
-  min-height: 36px;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
   color: var(--fg-3);
-  font-size: 14.5px;
+  font-size: 15.5px;
   line-height: 1.5;
   letter-spacing: 0.02em;
   text-decoration: none;
   transition: color 160ms ease;
+}
+
+/* Long names stay on one line and the row keeps a predictable column edge,
+   rather than each link sizing itself to its own label. */
+.footer-social-links a {
+  white-space: nowrap;
 }
 
 .footer-contact-links a:hover,
@@ -708,24 +1166,47 @@ main {
 }
 
 .footer-contact-links a[href^="mailto:"] {
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
+/* Social links read as a row of recognisable destinations rather than a list
+   of bare words. The label is the accessible name, so the glyph is decorative
+   and the icon carries no extra text for a screen reader to announce. */
 .footer-social-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  column-gap: 22px;
-  row-gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  gap: 2px 26px;
+}
+
+.footer-social-links a {
+  gap: 11px;
+}
+
+.footer-social-links svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.72;
+  transition: opacity 160ms ease, color 160ms ease;
+}
+
+.footer-social-links a:hover svg {
+  opacity: 1;
+}
+
+.footer-location {
+  gap: 9px !important;
 }
 
 .footer-location svg {
   width: 15px;
   height: 15px;
+  flex-shrink: 0;
 }
 
 .footer-brand {
   display: flex;
+  min-height: 44px;
   align-items: center;
   gap: 11px;
   color: var(--fg-2);
@@ -734,11 +1215,17 @@ main {
   letter-spacing: 0.12em;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────── */
+/* Responsive */
 @media (max-width: 940px) {
   .about-copy {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+
+  /* Two per row at this width, three above it, one at 640px. The basis is a
+     floor so the count of photographs never decides the layout. */
+  .gallery-cell:not(.gallery-cell-lead) {
+    flex-basis: 340px;
   }
 
   .stats-grid {
@@ -765,17 +1252,27 @@ main {
   }
 
   .hero {
-    padding: 60px 20px 84px;
+    padding: 40px 20px 32px;
   }
 
-  /* The scroll mark grows to a 44px target on touch, so it needs the extra
-     room reserved or it clips against the hero's bottom padding. */
-  .hero {
-    padding-bottom: 100px;
+  .hero h1 {
+    margin-top: 20px;
+    /* "Communication" is 13 characters, which at this face's advance and
+       tracking needs about 8.3em. The 34px floor would push it past the
+       column below roughly 320px, so the size is also capped by the width
+       actually available. Above 640px the padding differs and the clamp
+       never reaches the cap, so the cap is scoped here with it. */
+    font-size: min(clamp(34px, 7.2vw, 76px), calc((100vw - 40px) / 8.45));
   }
 
-  .hero-footnote {
-    padding: 0 20px 20px;
+  .hero-description {
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .hero-actions {
+    margin-top: 26px;
   }
 
   .about-section,
@@ -789,17 +1286,134 @@ main {
     padding-bottom: 72px;
   }
 
+  .page-hero {
+    padding-top: 82px;
+    padding-bottom: 62px;
+  }
+
+  /* "cybersecurity" is 14 characters, about 7.8em at this face. The 34px
+     floor pushes it past the reading column below roughly 300px, so the size
+     is capped by the width available. Every public hero uses the same shape
+     and the same 34px floor, so the cap covers all four. */
+  .page-hero h1,
+  .events-hero h1,
+  .gallery-heading-page h1,
+  .posts-hero h1 {
+    font-size: min(clamp(34px, 6vw, 68px), calc((100vw - 40px) / 7.9));
+  }
+
+  .page-hero + .about-section .about-copy {
+    margin-top: 48px;
+  }
+
+  .gallery-section {
+    padding: 68px 0;
+  }
+
+  .gallery-section-page {
+    padding-top: 82px;
+  }
+
+  .gallery-heading-page h1 {
+    font-size: clamp(30px, 8vw, 44px);
+  }
+
+  .gallery-grid {
+    margin-top: 36px;
+    gap: 14px;
+  }
+
+  .gallery-cell,
+  .gallery-cell-lead {
+    flex: 1 1 100%;
+  }
+
+  .gallery-empty {
+    margin-top: 36px;
+    padding: 28px 18px;
+  }
+
+  .gallery-viewer {
+    width: calc(100vw - 24px);
+    max-height: calc(100svh - 24px);
+  }
+
+  .gallery-viewer-inner {
+    max-height: calc(100svh - 24px);
+  }
+
+  .gallery-viewer-stage {
+    padding: 12px;
+  }
+
+  .gallery-viewer-image {
+    max-height: calc(100svh - 168px);
+  }
+
+  .gallery-viewer-bar {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .gallery-viewer-caption {
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .gallery-viewer-controls {
+    justify-content: flex-end;
+  }
+
+  /* On a phone, each complete fact gets its own readable line rather than
+     squeezing three long statements into a row. */
+  .hero-facts {
+    width: 100%;
+    margin-top: 26px;
+    gap: 10px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .hero-facts li {
+    max-width: 100%;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-facts strong {
+    font-size: 20px;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
 
   .program-card {
-    padding: 26px 20px;
-    grid-template-columns: 1fr 38px;
+    position: relative;
+    padding: 22px 20px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
 
   .program-number {
-    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+
+  .program-copy {
+    min-width: 0;
+  }
+
+  .program-copy h3 {
+    font-size: clamp(23px, 6.5vw, 27px);
+  }
+
+  .program-arrow {
+    position: absolute;
+    top: 14px;
+    right: 20px;
   }
 
   .site-footer {
@@ -811,35 +1425,213 @@ main {
   }
 
   .footer-social-links {
+    grid-template-columns: minmax(0, 1fr);
     column-gap: 16px;
   }
 
   .footer-contact-links a,
   .footer-social-links a {
-    /* One step down from desktop, and at the 44px tap target minimum. */
-    font-size: 13.5px;
-    min-height: 44px;
-  }
-
-  .footer-brand {
-    min-height: 44px;
+    font-size: 14.5px;
   }
 
   /* Reaches the 44px tap target minimum without changing the type. */
   .text-link {
-    min-height: 44px;
     padding-bottom: 10px;
   }
+}
+
+@media (max-width: 360px) {
+  .footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-description {
+    font-size: 14px;
+  }
+
+  .hero-actions {
+    margin-top: 22px;
+  }
+
+  .hero-facts {
+    margin-top: 24px;
+    gap: 8px;
+  }
+
+  .hero-facts li {
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .hero-facts strong {
+    font-size: 18px;
+  }
+}
+
+/* More content than a short phone can hold: keep the headline and all three
+   facts reachable instead of centring them into the clipped edges. */
+@media (max-height: 660px) and (max-width: 640px) {
+  .home-shell {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+
+  .home-shell main {
+    flex: none;
+  }
+
+  .home-shell .hero {
+    min-height: calc(100svh - 64px);
+    flex: none;
+    width: 100%;
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+}
+
+/* Below this height the fixed single-screen hero clips under `overflow:
+   hidden`; everything optional steps aside so the calls to action survive. */
+@media (max-height: 600px) and (min-width: 641px) {
+  .home-shell .hero {
+    padding: 24px 32px;
+  }
+
+  .home-shell .hero h1 {
+    margin-top: 0;
+    font-size: clamp(28px, 4.4vw, 44px);
+  }
+
+  .home-shell .hero-description {
+    display: none;
+  }
+
+  .home-shell .hero-actions {
+    margin-top: 22px;
+  }
+
+  .home-shell .hero-facts {
+    margin-top: 20px;
+    gap: 8px 16px;
+  }
+
+  .home-shell .hero-facts li {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .home-shell .hero-facts strong {
+    font-size: 16px;
+  }
+}
+
+/* Public pages layer charcoal surfaces; Home keeps its expressive matrix. */
+.public-page {
+  --surface: #161616;
+  --surface-2: #202020;
+  --surface-3: #262626;
+  --fg-4: #949494;
+  --line-strong: #707070;
+  isolation: isolate;
+  background: var(--bg);
+}
+
+.public-page :is(.page-hero, .about-section, .programs-section, .events-hero, .events-section, .events-featured-section, .posts-hero, .posts-section, .posts-info-section, .gallery-heading-page) {
+  position: relative;
+  isolation: isolate;
+}
+
+/* No per-section band paints: every public route is one continuous ground, so
+   a background change adapts the whole page at once. */
+.public-page :is(.page-hero, .about-section, .programs-section, .events-hero, .events-section, .events-featured-section, .posts-hero, .posts-section, .posts-info-section)::before {
+  display: none;
+}
+
+/* Sample the original shield's alpha; intersecting masks make static square dots. */
+.public-page :is(.page-hero, .events-hero, .posts-hero, .gallery-heading-page)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 12px;
+  right: 0;
+  width: clamp(230px, 36vw, 440px);
+  aspect-ratio: 1;
+  background: #343434;
+  opacity: 0.5;
+  mask-image: url("/ccs-logo.png"), repeating-linear-gradient(to right, #000 0 2px, transparent 2px 14px), repeating-linear-gradient(to bottom, #000 0 2px, transparent 2px 14px);
+  mask-size: contain, 100% 100%, 100% 100%;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-composite: intersect;
+  pointer-events: none;
+}
+
+.public-page .about-section {
+  display: flow-root;
+}
+
+.public-page .stat {
+  background: var(--surface);
+}
+
+.public-page .stat:hover {
+  background: var(--surface-2);
+}
+
+.public-page .gallery-total {
+  color: var(--fg-4);
+}
+
+.public-page .gallery-tile {
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.public-page .gallery-tile:hover {
+  border-color: var(--green);
+  background: var(--surface-3);
+}
+
+.public-page .event-card {
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.public-page .event-card:hover {
+  border-color: var(--green);
+  background: var(--surface-2);
+  transform: none;
+}
+
+.public-page .year-grid {
+  gap: 8px;
+}
+
+.public-page .year-grid button {
+  min-width: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.public-page .year-grid button:hover {
+  background: var(--surface-2);
+}
+
+.public-page .year-grid button.is-active {
+  border-bottom-color: var(--green);
+  background: var(--surface-3);
 }
 
 .events-page {
   flex: 1;
 }
 
+/* The events hero is the same shape as the about page's, so it reuses the
+   shared `.page-hero` metrics instead of repeating the values. */
 .events-hero {
   padding-top: 112px;
   padding-bottom: 82px;
-  border-bottom: 1px solid var(--line-2);
 }
 
 .events-hero h1 {
@@ -855,7 +1647,7 @@ main {
   max-width: 590px;
   margin: 24px 0 0;
   color: var(--fg-3);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.75;
 }
 
@@ -893,16 +1685,14 @@ main {
   display: block;
   margin-top: 9px;
   color: var(--fg-4);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
 }
 
 .events-section,
 .events-featured-section {
   padding-top: 86px;
   padding-bottom: 86px;
-  border-bottom: 1px solid var(--line-2);
 }
 
 .events-section-heading {
@@ -934,7 +1724,7 @@ main {
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   background: var(--surface);
   transition: border-color 180ms ease, transform 180ms ease;
@@ -975,9 +1765,9 @@ main {
 .event-cover-mark {
   padding: 6px 12px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--fg-4);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -1003,8 +1793,8 @@ main {
 
 .event-type {
   color: var(--fg-4);
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -1014,9 +1804,9 @@ main {
   padding: 0 9px;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--fg-3);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.05em;
   white-space: nowrap;
 }
@@ -1039,14 +1829,14 @@ main {
   display: block;
   margin-top: 10px;
   color: var(--fg-4);
-  font-size: 11px;
+  font-size: 12.5px;
   letter-spacing: 0.04em;
 }
 
 .event-summary {
   margin: 15px 0 0;
   color: var(--fg-3);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.75;
 }
 
@@ -1065,16 +1855,16 @@ main {
 
 .event-details dt {
   color: var(--fg-4);
-  font-size: 9px;
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .event-details dd {
   margin: 5px 0 0;
   color: var(--fg-2);
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .event-tags {
@@ -1089,9 +1879,9 @@ main {
 .event-tags li {
   padding: 5px 8px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 4px;
   color: var(--fg-3);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .event-register {
@@ -1100,7 +1890,7 @@ main {
   align-items: center;
   gap: 8px;
   color: var(--green);
-  font-size: 12px;
+  font-size: 13.5px;
   text-decoration: none;
 }
 
@@ -1136,7 +1926,7 @@ main {
 }
 
 .event-card-featured .event-summary {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .events-past-section {
@@ -1149,36 +1939,459 @@ main {
 
 .year-grid {
   display: flex;
-  padding: 4px;
+  padding: 0;
   flex-wrap: wrap;
-  gap: 4px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
+  gap: 18px;
 }
 
+/* Each year carries its own count, so the filter states how much it holds
+   instead of asking the reader to click through to find out. */
 .year-grid button {
-  min-height: 30px;
-  padding: 0 11px;
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0;
+  align-items: center;
+  gap: 7px;
   border: 0;
-  border-radius: 999px;
   background: transparent;
   color: var(--fg-4);
   font: inherit;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
+  transition: color 150ms ease;
+}
+
+/* Keep the count in a narrow column, separated by the flex gap so it does not
+   read as part of the year label. */
+.year-count {
+  min-width: 18px;
+  color: var(--fg-4);
+  font-size: 12px;
+  text-align: right;
 }
 
 .year-grid button:hover,
 .year-grid button.is-active {
-  background: var(--surface-3);
   color: var(--fg);
+}
+
+.year-grid button:hover .year-count,
+.year-grid button.is-active .year-count {
+  color: var(--fg-2);
+  opacity: 1;
+}
+
+.event-preview-track {
+  display: flex;
+  gap: 16px;
+  margin: 36px 0 0;
+  padding: 6px 6px 18px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 6px;
+  scroll-behavior: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-color: var(--line-strong) var(--surface);
+  scrollbar-width: thin;
+}
+
+.event-preview-track:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.event-preview-item {
+  display: flex;
+  flex: 0 0 calc(100% - 28px);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.event-preview {
+  position: relative;
+  width: 100%;
+}
+
+.event-preview .event-card-body {
+  flex: 1;
+  padding: 20px;
+}
+
+.event-preview .event-card-topline {
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.event-preview h3 {
+  font-size: clamp(20px, 1.8vw, 25px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.event-preview .event-date {
+  overflow-wrap: anywhere;
+}
+
+.event-preview-open {
+  align-self: stretch;
+  min-height: 44px;
+  margin-top: auto;
+  padding: 12px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The preview has one action, so its whole surface opens the details. */
+.event-preview-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.event-preview-open:focus-visible::after {
+  outline: 2px solid var(--green);
+  outline-offset: -3px;
+  border-radius: var(--radius);
+}
+
+.event-archive-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.event-archive-position {
+  margin: 0;
+  color: var(--fg-4);
+  font-size: 12.5px;
+}
+
+.event-archive-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.event-archive-controls button,
+.event-dialog-toolbar button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.event-archive-controls button:hover:not(:disabled),
+.event-dialog-toolbar button:hover {
+  background: var(--surface-3);
+  border-color: var(--green);
+}
+
+.event-archive-controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.event-archive-controls svg,
+.event-dialog-toolbar svg {
+  width: 18px;
+  height: 18px;
+}
+
+.event-details-dialog {
+  width: min(680px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--fg);
+}
+
+.event-details-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.event-dialog-toolbar {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  background: var(--surface-2);
+}
+
+.event-details-dialog .event-card {
+  border: 0;
+  border-radius: 0;
+}
+
+.event-details-dialog .event-details {
+  width: 100%;
+}
+
+.event-details-dialog .event-details dd {
+  overflow-wrap: anywhere;
+}
+
+.event-details-dialog .event-register {
+  min-height: 44px;
+}
+
+@media (min-width: 600px) {
+  .event-preview-item {
+    flex-basis: calc((100% - 16px) / 2);
+  }
+}
+
+@media (min-width: 1100px) {
+  .event-preview-item {
+    flex-basis: calc((100% - 32px) / 3);
+  }
 }
 
 .events-empty {
   margin: 42px 0 0;
   color: var(--fg-4);
+  font-size: 14.5px;
+}
+
+.posts-page {
+  flex: 1;
+}
+
+.posts-hero {
+  padding-top: 112px;
+  padding-bottom: 82px;
+}
+
+.posts-hero h1 {
+  max-width: 820px;
+  margin: 30px 0 0;
+  font-size: clamp(34px, 6vw, 68px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+
+.posts-hero > p {
+  max-width: 590px;
+  margin: 24px 0 0;
+  color: var(--fg-3);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.posts-section {
+  padding-top: 86px;
+  padding-bottom: 112px;
+}
+
+.posts-info-section {
+  padding-top: 86px;
+  padding-bottom: 112px;
+}
+
+.posts-section-heading h2 {
+  margin: 22px 0 0;
+  font-size: clamp(27px, 4vw, 44px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.facebook-post-carousel {
+  margin-top: 42px;
+}
+
+.facebook-post-track {
+  display: flex;
+  margin: 0;
+  padding: 6px 6px 18px;
+  align-items: flex-start;
+  gap: 16px;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-behavior: auto;
+  scroll-padding-inline: 6px;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--line-strong) var(--surface);
+  scrollbar-width: thin;
+}
+
+.facebook-post-track:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.facebook-post-item {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 min(520px, calc(100% - 28px));
+  container-type: inline-size;
+  scroll-snap-align: start;
+}
+
+.facebook-post-card {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 500px;
+  height: clamp(380px, calc(56.25cqw + 205px), 500px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.facebook-post-image {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.facebook-post-image img {
+  object-fit: cover;
+}
+
+.facebook-post-body {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  padding: 18px 20px 20px;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.facebook-post-date,
+.admin-facebook-date {
+  color: var(--fg-4);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.facebook-post-message {
+  display: -webkit-box;
+  max-height: 6.4em;
+  margin: 10px 0 0;
+  overflow: hidden;
+  color: var(--fg-2);
   font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+.facebook-post-open,
+.admin-facebook-post-actions a {
+  display: inline-flex;
+  min-height: 44px;
+  margin-top: 24px;
+  padding: 12px 0 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--green);
+  font-size: 13.5px;
+  text-decoration: none;
+}
+
+.facebook-post-open {
+  margin-top: auto;
+  padding-top: 8px;
+  font-size: 12.5px;
+}
+
+.facebook-post-open:hover,
+.admin-facebook-post-actions a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.facebook-post-open svg,
+.admin-facebook-post-actions a svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.facebook-post-carousel-toolbar {
+  display: flex;
+  margin-top: 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.facebook-post-carousel-position {
+  margin: 0;
+  color: var(--fg-4);
+  font-size: 12.5px;
+}
+
+.facebook-post-carousel-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.facebook-post-carousel-controls button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--fg);
+  cursor: pointer;
+}
+
+.facebook-post-carousel-controls button:hover:not(:disabled) {
+  border-color: var(--green);
+  background: var(--surface-3);
+}
+
+.facebook-post-carousel-controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.facebook-post-carousel-controls svg {
+  width: 18px;
+  height: 18px;
+}
+
+.posts-empty {
+  margin: 42px 0 0;
+  color: var(--fg-4);
+  font-size: 14.5px;
 }
 
 .admin-page {
@@ -1261,7 +2474,7 @@ main {
 
 .form-kicker {
   color: var(--green);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.16em;
 }
 
@@ -1289,7 +2502,7 @@ main {
   padding: 16px 17px;
   border-bottom: 1px solid var(--line);
   color: var(--fg-4);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1333,7 +2546,7 @@ main {
 
 .admin-event-type {
   color: var(--green);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1347,11 +2560,12 @@ main {
 .admin-event-select small {
   margin-top: 6px;
   color: var(--fg-4);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .admin-delete-button {
-  width: 38px;
+  width: 44px;
+  min-height: 44px;
   flex-shrink: 0;
   border: 0;
   border-left: 1px solid var(--line-2);
@@ -1408,11 +2622,15 @@ main {
 }
 
 .text-button {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
   border: 0;
   background: transparent;
   color: var(--green);
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -1434,7 +2652,7 @@ main {
   flex-direction: column;
   gap: 7px;
   color: var(--fg-3);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .form-field-full {
@@ -1454,7 +2672,7 @@ main {
   align-items: center;
   justify-content: space-between;
   color: var(--fg-2);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   list-style: none;
 }
@@ -1483,7 +2701,7 @@ main {
 .form-field select,
 .form-field textarea {
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   padding: 9px 11px;
   border: 1px solid var(--control-border);
   border-radius: 7px;
@@ -1515,12 +2733,13 @@ main {
 
 .form-field small {
   color: var(--fg-4);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .checkbox-field {
   display: flex;
+  min-height: 44px;
   align-items: center;
   gap: 9px;
   color: var(--fg-2);
@@ -1585,40 +2804,203 @@ button:disabled {
   margin-top: 28px;
 }
 
+.admin-facebook {
+  margin-top: 64px;
+  padding-top: 42px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-facebook-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-facebook-header h2 {
+  margin: 12px 0 0;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+.admin-facebook-header p {
+  max-width: 650px;
+  margin: 12px 0 0;
+  color: var(--fg-3);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.admin-facebook .button {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.admin-facebook-info-hint {
+  margin: 14px 0 0;
+  color: var(--fg-4);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.admin-facebook-grid {
+  display: grid;
+  margin-top: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+
+.admin-facebook-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-facebook-panel-heading {
+  display: flex;
+  min-height: 58px;
+  padding: 13px 17px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-facebook-panel-heading h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.admin-facebook-panel-heading span {
+  color: var(--fg-4);
+  font-size: 12px;
+}
+
+.admin-facebook-post {
+  min-width: 0;
+  padding: 16px 17px;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.admin-facebook-post:last-child {
+  border-bottom: 0;
+}
+
+.admin-facebook-message {
+  margin: 9px 0 0;
+  color: var(--fg-2);
+  font-size: 12px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-facebook-post-actions {
+  display: flex;
+  min-width: 0;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-facebook-post-actions a {
+  margin-top: 0;
+  padding-top: 0;
+  font-size: 12px;
+}
+
+.admin-facebook-post-actions .text-button {
+  margin-left: auto;
+}
+
+.admin-facebook-selected {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 12px;
+}
+
 .mobile-nav {
   display: none;
   flex-shrink: 0;
 }
 
 .mobile-nav summary {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 9px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   border: 1px solid var(--line);
-  border-radius: 50%;
+  border-radius: 6px;
   color: var(--fg-2);
   cursor: pointer;
+  font-size: 12px;
   list-style: none;
+}
+
+.mobile-menu-label {
+  line-height: 1;
 }
 
 .mobile-nav summary::-webkit-details-marker {
   display: none;
 }
 
+/* The bars cross into a close mark once the panel is open, so the control
+   reports its state without relying on the panel appearing as the only cue. */
 .mobile-menu-icon {
-  display: grid;
+  position: relative;
+  display: block;
   width: 15px;
-  gap: 3px;
+  height: 11px;
 }
 
 .mobile-menu-icon i {
+  position: absolute;
+  left: 0;
   display: block;
   width: 15px;
   height: 1px;
   background: currentColor;
+  transition: transform 180ms ease, opacity 140ms ease, top 180ms ease;
 }
 
+.mobile-menu-icon i:nth-child(1) {
+  top: 0;
+}
+
+.mobile-menu-icon i:nth-child(2) {
+  top: 5px;
+}
+
+.mobile-menu-icon i:nth-child(3) {
+  top: 10px;
+}
+
+.mobile-nav[open] .mobile-menu-icon i:nth-child(1) {
+  top: 5px;
+  transform: rotate(45deg);
+}
+
+.mobile-nav[open] .mobile-menu-icon i:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-nav[open] .mobile-menu-icon i:nth-child(3) {
+  top: 5px;
+  transform: rotate(-45deg);
+}
+
+/* Sized to its content: a percentage width stretched the panel across the
+   nearly full-width phone header and read as a bottom sheet. */
 .mobile-nav-panel {
   position: absolute;
   top: calc(100% + 10px);
@@ -1643,8 +3025,40 @@ button:disabled {
 }
 
 .mobile-nav-panel a:hover {
-  background: var(--surface-2);
   color: var(--fg);
+}
+
+@media (max-width: 360px) {
+  .mobile-nav summary {
+    padding: 0 8px;
+  }
+
+  .mobile-menu-icon {
+    display: none;
+  }
+}
+
+/* Below 250px the wordmark has no room between the logo and the language
+   control. A squeezed flex item still paints its text, so the two overlap and
+   the header reads "CCSEN". The shield carries the brand on its own here. */
+@media (max-width: 249px) {
+  .brand-copy {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .main-nav {
+    display: none;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
 }
 
 @media (max-width: 940px) {
@@ -1665,7 +3079,8 @@ button:disabled {
     aspect-ratio: 16 / 9;
   }
 
-  .admin-layout {
+  .admin-layout,
+  .admin-facebook-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1707,13 +3122,15 @@ button:disabled {
     gap: 4px;
   }
 
-  .locale-toggle {
-    padding: 2px;
+  /* The header is a flex row, so the menu needs an explicit containing block
+     before the panel can position itself against the header's edge. */
+  .mobile-nav {
+    position: relative;
   }
 
-  .locale-toggle button {
-    min-width: 36px;
-    min-height: 44px;
+  .mobile-nav-panel {
+    right: -2px;
+    min-width: 200px;
   }
 
   .events-state {
@@ -1722,7 +3139,8 @@ button:disabled {
     padding-bottom: 80px;
   }
 
-  .events-hero {
+  .events-hero,
+  .posts-hero {
     padding-top: 82px;
     padding-bottom: 62px;
   }
@@ -1744,15 +3162,18 @@ button:disabled {
   }
 
   .events-section,
-  .events-featured-section {
+  .events-featured-section,
+  .posts-section,
+  .posts-info-section {
     padding-top: 56px;
-    padding-bottom: 56px;
+    padding-bottom: 72px;
   }
 
   .events-section-heading,
   .events-past-heading,
   .admin-dashboard-header,
-  .admin-toolbar {
+  .admin-toolbar,
+  .admin-facebook-header {
     align-items: start;
     flex-direction: column;
   }
@@ -1773,27 +3194,14 @@ button:disabled {
     display: grid;
     width: 100%;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    border-radius: var(--radius);
+    gap: 4px 10px;
   }
 
   .year-grid button {
-    min-height: 44px;
     width: 100%;
-    padding-right: 13px;
-    padding-left: 13px;
   }
 
   .event-register {
-    min-height: 44px;
-  }
-
-  .form-field input,
-  .form-field select,
-  .form-field textarea {
-    min-height: 44px;
-  }
-
-  .admin-delete-button {
     min-height: 44px;
   }
 
@@ -1809,6 +3217,25 @@ button:disabled {
 
   .admin-editor {
     padding: 20px;
+  }
+
+  .facebook-post-body {
+    padding: 16px 18px 18px;
+  }
+
+  .admin-facebook {
+    margin-top: 48px;
+    padding-top: 32px;
+  }
+
+  .admin-facebook-post-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-facebook-post-actions .text-button,
+  .admin-facebook-selected {
+    margin-left: 0;
   }
 
   .form-grid {

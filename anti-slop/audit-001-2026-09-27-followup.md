@@ -122,3 +122,10 @@ slot points at the side event rather than the thing it belonged to.
 This was not changed. Adding an event means asserting its date, format, location
 and participant numbers, and those are facts only the club has. Add it through
 `/admin` once the fields are confirmed.
+
+## 2026-09-29 status update
+
+The question above is now closed against the current event data. `data/events.json`
+contains a BANKSEC #7 record, and `ctf-duel-2026` is no longer marked as the
+featured event. The two records remain separate; the data does not assert a
+relationship between them.

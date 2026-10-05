@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import {
   EVENT_STATUSES,
   EVENT_TYPES,
+  sortEvents,
   type Event,
   type EventStatus,
   type EventType,
@@ -17,12 +18,6 @@ const EVENTS_FILE = path.resolve(
   process.env.EVENTS_FILE_PATH || DEFAULT_EVENTS_FILE,
 );
 const MAX_EVENTS = 500;
-
-const STATUS_ORDER: Record<EventStatus, number> = {
-  upcoming: 0,
-  ongoing: 1,
-  ended: 2,
-};
 
 export class EventValidationError extends Error {
   constructor(message: string) {
@@ -110,10 +105,9 @@ function parseOptionalDate(
   return parseDate(value, key);
 }
 
-function parseRevision(value: unknown, required: boolean): number | undefined {
+function parseRevision(value: unknown): number | undefined {
   if (value === undefined || value === null) {
-    if (required) fail("revision is required");
-    return undefined;
+    fail("revision is required");
   }
   if (!Number.isSafeInteger(value) || (value as number) < 1) {
     fail("revision must be a positive integer");
@@ -254,20 +248,8 @@ function parseFields(value: unknown): EventFields {
 function parseEvent(value: unknown): Event {
   if (!isRecord(value)) fail("event must be an object");
   const id = parseId(value.id, true);
-  const revision = value.revision === undefined ? 1 : parseRevision(value.revision, true);
+  const revision = value.revision === undefined ? 1 : parseRevision(value.revision);
   return { id: id as string, ...parseFields(value), revision: revision as number };
-}
-
-function sortEvents(events: Event[]): Event[] {
-  return [...events].sort((a, b) => {
-    const statusDifference = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
-    if (statusDifference !== 0) return statusDifference;
-
-    const dateDifference = a.date.localeCompare(b.date);
-    return STATUS_ORDER[a.status] === STATUS_ORDER.ended
-      ? -dateDifference
-      : dateDifference;
-  });
 }
 
 function keepOneFeaturedEvent(events: Event[], preferredId?: string): Event[] {
@@ -432,7 +414,7 @@ export function updateEvent(id: string, value: unknown): Promise<Event> {
     if (index === -1) fail(`event ${id} was not found`);
     if (!isRecord(value)) fail("event must be an object");
 
-    const submittedRevision = parseRevision(value.revision, true) as number;
+    const submittedRevision = parseRevision(value.revision) as number;
     if (current[index].revision !== submittedRevision) {
       throw new EventConflictError(id);
     }
@@ -457,7 +439,7 @@ export function deleteEvent(
   id: string,
   expectedRevision: unknown,
 ): Promise<boolean> {
-  const submittedRevision = parseRevision(expectedRevision, true) as number;
+  const submittedRevision = parseRevision(expectedRevision) as number;
 
   return mutateEvents((current) => {
     const index = current.findIndex((event) => event.id === id);

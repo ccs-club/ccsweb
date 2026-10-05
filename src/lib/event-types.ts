@@ -45,3 +45,24 @@ export type EventDraft = Omit<Event, "id" | "revision"> & {
   id?: string;
   revision?: number;
 };
+
+const STATUS_ORDER: Record<EventStatus, number> = {
+  upcoming: 0,
+  ongoing: 1,
+  ended: 2,
+};
+
+/* Upcoming first by soonest date, ended last by newest date first. Shared by
+   the server store and the admin list; lives here because the store module
+   imports node:fs and cannot enter a client bundle. */
+export function sortEvents(events: Event[]): Event[] {
+  return [...events].sort((a, b) => {
+    const statusDifference = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+    if (statusDifference !== 0) return statusDifference;
+
+    const dateDifference = a.date.localeCompare(b.date);
+    return STATUS_ORDER[a.status] === STATUS_ORDER.ended
+      ? -dateDifference
+      : dateDifference;
+  });
+}

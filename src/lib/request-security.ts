@@ -5,12 +5,34 @@ export class RequestBodyTooLargeError extends Error {
   }
 }
 
+const JSON_HEADERS = {
+  "Cache-Control": "no-store",
+  "Content-Type": "application/json",
+};
+
+export function jsonResponse(
+  body: unknown,
+  status = 200,
+  headers?: HeadersInit,
+): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...JSON_HEADERS, ...headers },
+  });
+}
+
 export function isSameOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   if (!origin) return false;
 
   try {
-    return new URL(origin).origin === new URL(request.url).origin;
+    const requestUrl = new URL(request.url);
+    const host = request.headers.get("host");
+    const expected = host
+      ? new URL(`${requestUrl.protocol}//${host}`)
+      : requestUrl;
+    if (host && /[\s/\\?#@]/.test(host)) return false;
+    return new URL(origin).origin === expected.origin;
   } catch {
     return false;
   }

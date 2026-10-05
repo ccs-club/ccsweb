@@ -1,0 +1,40 @@
+{
+  "$comment": "Source of truth for the photograph gallery. Read by scripts/build-gallery.mjs, which crops and compresses each source into public/gallery/, and by src/components/gallery-plates.ts, which renders them in this order. Captions and alt text live in src/app/i18n.ts under gallery.items, keyed by id. The plate marked lead is rendered full width; the rest form the grid. Newest first. /about shows only the lead photo; `feature` can add previews without removing anything from /gallery's full archive.",
+  "plates": [
+    {
+      "id": "mnsec-2026",
+      "source": "mnsec2026.jpg",
+      "width": 2000,
+      "ratio": 1.7777777778,
+      "lead": true,
+      "position": "bottom"
+    },
+    { "id": "must-ctf-2025-winners", "source": "must-ctf-group-2025.jpg", "width": 1400, "ratio": 1.3333333333, "feature": false },
+    { "id": "must-ctf-2025-friends", "source": "must-ctf-friends-2025.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "banksec-6-2025", "source": "banksec-group-2025.jpg", "width": 1400, "ratio": 1.3333333333, "feature": false },
+    { "id": "banksec-welcome-2025", "source": "banksec-welcome-2025.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "banksec-6-friends-2025", "source": "banksec-friends-2025.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "ccs-talk-2024", "source": "ccs-talk-group-2024.jpg", "width": 1333, "ratio": 1.3333333333 },
+    { "id": "banksec-2024", "source": "banksec-group-2024.png", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "must-ctf-mentoring-2023", "source": "must-ctf-mentoring-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "must-ctf-community-2023", "source": "must-ctf-community-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "must-ctf-competition-2023", "source": "must-ctf-competition-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "must-ctf-awards-2023", "source": "must-ctf-awards-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "must-ctf-group-2023", "source": "must-ctf-group-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "ccs-conference-2023", "source": "ccs-conference-2023.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "ccs-ctf-2020", "source": "ccs-ctf-2020.jpg", "width": 1400, "ratio": 1.3333333333 },
+    { "id": "founding-2020", "source": "ccs-members-2020.jpg", "width": 1400, "ratio": 1.3333333333, "position": "centre" },
+    { "id": "early-members", "source": "ccs-early-members.png", "width": 864, "ratio": 1.3333333333, "position": "centre" },
+    { "id": "ccs-members-2022", "source": "ccs-members-2022.png", "width": 1229, "ratio": 1.3333333333, "position": "centre" }
+  ],
+  "omitted": [
+    {
+      "source": "ccs-expo-team-2024.jpg",
+      "reason": "A close selfie whose foreground face is distorted by the lens. Usable if the club wants it: recrop tighter and the distortion drops out of frame. Left out because nobody has confirmed the people in it are comfortable being on the site."
+    },
+    {
+      "source": "banksec-three-friends-2025.jpg",
+      "reason": "Stored rotated, and it was originally held back for that reason. That reason was wrong: the build calls .rotate(), which honours EXIF orientation before reading pixels, and a 4:3 crop of the corrected image is fine. What is left is the same question as the other seventeen: confirm these three are happy to be on the site. To publish, add a plate with this source, add its copy under gallery.items in both locales, and re-run the build."
+    }
+  ]
+}

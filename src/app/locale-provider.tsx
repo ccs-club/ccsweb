@@ -2,12 +2,14 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useSyncExternalStore,
 } from "react";
 import { usePathname } from "next/navigation";
 import { dictionaries, type Dictionary, type Locale } from "./i18n";
+import { pageDescription, pageTitle, type PageName } from "./page-metadata";
 
 const STORAGE_KEY = "ccs-locale";
 const LOCALE_CHANGE_EVENT = "ccs-locale-change";
@@ -46,10 +48,6 @@ function subscribe(onStoreChange: () => void): () => void {
   };
 }
 
-function getServerLocale(): Locale {
-  return DEFAULT_LOCALE;
-}
-
 const LocaleContext = createContext<{
   locale: Locale;
   dictionary: Dictionary;
@@ -77,9 +75,16 @@ function updateMeta(attribute: "name" | "property", key: string, content: string
   if (element) element.content = content;
 }
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  // The server snapshot is always English, so the first client render hydrates
-  // safely. useSyncExternalStore then applies a saved locale after hydration.
+export function LocaleProvider({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  // Route pages pass the URL locale so server HTML and the first client render
+  // use the same language. The browser store still handles later changes.
+  const getServerLocale = useCallback(() => initialLocale, [initialLocale]);
   const locale = useSyncExternalStore(
     subscribe,
     readStoredLocale,
@@ -90,18 +95,20 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = locale;
     const dictionary = dictionaries[locale];
-    const title =
+    const page: PageName =
       pathname === "/events"
-        ? `${dictionary.events.title} | CCS Club`
-        : pathname === "/admin"
-          ? `${dictionary.admin.title} | CCS Club`
-          : dictionary.meta.title;
-    const description =
-      pathname === "/events"
-        ? dictionary.events.intro
-        : pathname === "/admin"
-          ? dictionary.admin.subtitle
-          : dictionary.meta.description;
+        ? "events"
+        : pathname === "/posts"
+          ? "posts"
+        : pathname === "/gallery"
+          ? "gallery"
+          : pathname === "/about"
+            ? "about"
+            : pathname === "/admin"
+              ? "admin"
+              : "home";
+    const title = pageTitle(page, dictionary);
+    const description = pageDescription(page, dictionary);
     document.title = title;
     const url = new URL(window.location.href);
     if (locale === "mn" && url.searchParams.get("lang") !== "mn") {
@@ -115,11 +122,6 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     updateMeta("property", "og:url", `${url.origin}${url.pathname}${url.search}`);
     updateMeta("name", "twitter:title", title);
     updateMeta("name", "twitter:description", description);
-    const titleUpdate = window.setTimeout(() => {
-      document.title = title;
-    }, 50);
-
-    return () => window.clearTimeout(titleUpdate);
   }, [locale, pathname]);
 
   const setLocale = (next: Locale) => {
@@ -142,7 +144,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     <LocaleContext.Provider
       value={{ locale, dictionary: dictionaries[locale], setLocale }}
     >
-      {children}
+      <div lang={locale}>{children}</div>
     </LocaleContext.Provider>
   );
 }
