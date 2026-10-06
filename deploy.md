@@ -95,7 +95,6 @@ scripts
 tests
 playwright.config.ts
 review.md
-DESIGN.md
 ```
 
 `events/` and `gallery/` are build inputs (`scripts/build-gallery.mjs`
