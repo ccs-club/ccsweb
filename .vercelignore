@@ -1,12 +1,15 @@
 # Keep Vercel uploads small — app needs src/, public/, data/, package.json,
 # package-lock.json, next.config.ts, tsconfig.json, eslint.config.mjs.
 # .next/ is built server-side, never upload it.
-# NOTE: do NOT ignore scripts/ — npm run build calls scripts/check-gallery.mjs.
-anti-slop
-events
-gallery
-tests
-test-results
-playwright.config.ts
-review.md
-.next
+# NOTE: patterns are root-anchored (leading /) so src/app/events/ is uploaded.
+# Do NOT ignore scripts/ — npm run build calls scripts/check-gallery.mjs.
+/anti-slop
+/events
+/gallery
+/tests
+/test-results
+/playwright.config.ts
+/review.md
+/.next
+/.agents
+/skills-lock.json
