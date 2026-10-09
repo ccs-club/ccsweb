@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { connection } from "next/server";
+import { createDocumentStore } from "./document-store";
 import {
   EVENT_STATUSES,
   EVENT_TYPES,
@@ -17,6 +17,13 @@ const EVENTS_FILE = path.resolve(
   /*turbopackIgnore: true*/
   process.env.EVENTS_FILE_PATH || DEFAULT_EVENTS_FILE,
 );
+const store = createDocumentStore({
+  key: "events",
+  label: "events",
+  filePath: EVENTS_FILE,
+  fileConfigured: EVENTS_FILE_CONFIGURED,
+  seedFilePath: DEFAULT_EVENTS_FILE,
+});
 const MAX_EVENTS = 500;
 
 export class EventValidationError extends Error {
@@ -263,26 +270,8 @@ function keepOneFeaturedEvent(events: Event[], preferredId?: string): Event[] {
   });
 }
 
-async function readEventsFromDisk(): Promise<Event[]> {
-  let source: string;
-  try {
-    source = await fs.readFile(/*turbopackIgnore: true*/ EVENTS_FILE, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      if (EVENTS_FILE_CONFIGURED) {
-        throw new Error("The configured events file is missing.");
-      }
-      return [];
-    }
-    throw error;
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(source);
-  } catch {
-    throw new Error(`Unable to parse events file at ${EVENTS_FILE}`);
-  }
+function parseStoredEvents(parsed: unknown): Event[] {
+  if (parsed === undefined) return [];
 
   const values = Array.isArray(parsed)
     ? parsed
@@ -303,45 +292,28 @@ async function readEventsFromDisk(): Promise<Event[]> {
   );
 }
 
-async function writeEventsToDisk(events: Event[]): Promise<void> {
-  await fs.mkdir(path.dirname(EVENTS_FILE), { recursive: true });
-  const temporaryFile = `${EVENTS_FILE}.${process.pid}.${randomUUID()}.tmp`;
-  await fs.writeFile(
-    temporaryFile,
-    `${JSON.stringify(sortEvents(events), null, 2)}\n`,
-    { encoding: "utf8", mode: 0o600 },
-  );
-  await fs.rename(temporaryFile, EVENTS_FILE);
+async function readEvents(): Promise<Event[]> {
+  return parseStoredEvents(await store.read());
 }
-
-let mutationQueue: Promise<void> = Promise.resolve();
 
 function mutateEvents<T>(
   mutator: (events: Event[]) => Promise<{ events: Event[]; result: T }> | { events: Event[]; result: T },
 ): Promise<T> {
-  const operation = mutationQueue.then(async () => {
-    const current = await readEventsFromDisk();
-    const next = await mutator(current);
-    await writeEventsToDisk(next.events);
-    return next.result;
+  return store.update(async (stored) => {
+    const next = await mutator(parseStoredEvents(stored));
+    return { next: sortEvents(next.events), result: next.result };
   });
-
-  mutationQueue = operation.then(
-    () => undefined,
-    () => undefined,
-  );
-  return operation;
 }
 
 /** Read fresh event data for a page render. */
 export async function getEvents(): Promise<Event[]> {
   await connection();
-  return readEventsFromDisk();
+  return readEvents();
 }
 
 /** Read fresh event data for a request-time API handler. */
 export function getEventsForRequest(): Promise<Event[]> {
-  return readEventsFromDisk();
+  return readEvents();
 }
 
 function slugify(value: string): string {

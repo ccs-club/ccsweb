@@ -14,6 +14,9 @@ const post = {
 test("Facebook post selections validate, serialize, and retain concurrent writes", async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "ccs-facebook-posts-test-"));
   const previousPath = process.env.FACEBOOK_POSTS_FILE_PATH;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  // These tests exercise the file store; never let them reach a real database.
+  delete process.env.DATABASE_URL;
   process.env.FACEBOOK_POSTS_FILE_PATH = path.join(directory, "facebook-posts.json");
   await writeFile(process.env.FACEBOOK_POSTS_FILE_PATH, "[]\n");
   const store = await import("../src/lib/facebook-posts");
@@ -69,6 +72,7 @@ test("Facebook post selections validate, serialize, and retain concurrent writes
   } finally {
     if (previousPath === undefined) delete process.env.FACEBOOK_POSTS_FILE_PATH;
     else process.env.FACEBOOK_POSTS_FILE_PATH = previousPath;
+    if (previousDatabaseUrl !== undefined) process.env.DATABASE_URL = previousDatabaseUrl;
     await rm(directory, { recursive: true, force: true });
   }
 });

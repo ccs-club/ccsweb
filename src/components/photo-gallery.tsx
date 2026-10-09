@@ -33,15 +33,16 @@ type GalleryDictionary = {
    are therefore: the reserved tile box while an image decodes, a labelled
    placeholder if one fails, and the empty state if the plate list is empty.
 
-   `photos` is a set, not a global: `/about` passes its lead-photo preview
-   and `/gallery` passes the whole archive, so the viewer, its counter and
-   its arrow keys all step through whichever set the page is actually showing. */
+   `photos` is a set, not a global: the viewer, its counter and its arrow keys
+   step through whichever curated set the caller passes. */
 export default function PhotoGallery({
   photos,
   t,
+  leadSizes,
 }: {
   photos: GalleryPhoto[];
   t: GalleryDictionary;
+  leadSizes?: string;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
@@ -137,7 +138,7 @@ export default function PhotoGallery({
               height={photo.height}
               sizes={
                 isLead
-                  ? "(max-width: 1240px) 100vw, 1180px"
+                  ? leadSizes ?? "(max-width: 1240px) 100vw, 1180px"
                   : "(max-width: 640px) calc(100vw - 40px), (max-width: 940px) calc(50vw - 32px), (max-width: 1240px) calc(33vw - 30px), 382px"
               }
               loading="lazy"

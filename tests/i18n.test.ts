@@ -6,7 +6,6 @@ test("public page copy is clear and complete in both languages", () => {
   assert.equal(dictionaries.en.hero.description, "CCS is a student club at MUST. We run cybersecurity competitions, give talks, and hold hands-on sessions.");
   assert.equal(dictionaries.mn.hero.description, "CCS нь ШУТИС-ийн оюутны клуб. Бид мэдээллийн аюулгүй байдлын тэмцээн зохион байгуулж, лекц уншиж, дадлага сургалт явуулдаг.");
   assert.equal(dictionaries.en.about.pageTitle, "A cybersecurity club for MUST students.");
-  assert.equal(dictionaries.en.galleryPage.title, "CCS photo gallery");
   assert.equal(dictionaries.en.posts.title, "Updates from CCS.");
   assert.equal(dictionaries.mn.posts.title, "CCS-ийн шинэ мэдээлэл.");
   assert.equal(dictionaries.en.posts.info, "CCS information");
@@ -19,6 +18,5 @@ test("public page copy is clear and complete in both languages", () => {
   assert.equal(dictionaries.en.join.body, "No experience needed. Just come ready to learn.");
   assert.equal(`${dictionaries.mn.join.titleLine1} ${dictionaries.mn.join.titleAccent}`, "Бидэнтэй нэгдээрэй.");
   assert.equal(dictionaries.mn.join.body, "Туршлага шаардахгүй. Сурах хүсэл, эрмэлзэл байхад болно.");
-  assert.equal(dictionaries.mn.galleryPage.title, "CCS клубын гэрэл зургийн цомог");
   assert.ok(!dictionaries.mn.join.body.includes("Cурах"), "Mongolian Сурах uses the Cyrillic letter С");
 });

@@ -1,7 +1,6 @@
-import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
 import path from "node:path";
 import { connection } from "next/server";
+import { createDocumentStore } from "./document-store";
 import {
   isFacebookPostId,
   normalizeFacebookPost,
@@ -14,6 +13,13 @@ const FACEBOOK_POSTS_FILE = path.resolve(
   /*turbopackIgnore: true*/
   process.env.FACEBOOK_POSTS_FILE_PATH || DEFAULT_FACEBOOK_POSTS_FILE,
 );
+const store = createDocumentStore({
+  key: "facebook-posts",
+  label: "Facebook posts",
+  filePath: FACEBOOK_POSTS_FILE,
+  fileConfigured: FACEBOOK_POSTS_FILE_CONFIGURED,
+  seedFilePath: DEFAULT_FACEBOOK_POSTS_FILE,
+});
 const MAX_SELECTED_POSTS = 24;
 
 export class FacebookPostStoreError extends Error {
@@ -31,26 +37,8 @@ function sortFacebookPosts(posts: FacebookPost[]): FacebookPost[] {
   return [...posts].sort((a, b) => b.createdTime.localeCompare(a.createdTime));
 }
 
-async function readFacebookPostsFromDisk(): Promise<FacebookPost[]> {
-  let source: string;
-  try {
-    source = await fs.readFile(/*turbopackIgnore: true*/ FACEBOOK_POSTS_FILE, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      if (FACEBOOK_POSTS_FILE_CONFIGURED) {
-        throw new Error("The configured Facebook posts file is missing.");
-      }
-      return [];
-    }
-    throw error;
-  }
-
-  let values: unknown;
-  try {
-    values = JSON.parse(source);
-  } catch {
-    throw new Error(`Unable to parse Facebook posts file at ${FACEBOOK_POSTS_FILE}`);
-  }
+function parseStoredFacebookPosts(values: unknown): FacebookPost[] {
+  if (values === undefined) return [];
   if (!Array.isArray(values)) {
     throw new Error("Facebook posts file must contain an array of posts");
   }
@@ -70,52 +58,35 @@ async function readFacebookPostsFromDisk(): Promise<FacebookPost[]> {
   return sortFacebookPosts(posts);
 }
 
-async function writeFacebookPostsToDisk(posts: FacebookPost[]): Promise<void> {
-  await fs.mkdir(path.dirname(FACEBOOK_POSTS_FILE), { recursive: true });
-  const temporaryFile = `${FACEBOOK_POSTS_FILE}.${process.pid}.${randomUUID()}.tmp`;
-  await fs.writeFile(
-    temporaryFile,
-    `${JSON.stringify(sortFacebookPosts(posts), null, 2)}\n`,
-    { encoding: "utf8", mode: 0o600 },
-  );
-  await fs.rename(temporaryFile, FACEBOOK_POSTS_FILE);
+async function readFacebookPosts(): Promise<FacebookPost[]> {
+  return parseStoredFacebookPosts(await store.read());
 }
-
-let mutationQueue: Promise<void> = Promise.resolve();
 
 function mutateFacebookPosts<T>(
   mutator: (posts: FacebookPost[]) => { posts: FacebookPost[]; result: T },
 ): Promise<T> {
-  const operation = mutationQueue.then(async () => {
-    const current = await readFacebookPostsFromDisk();
-    const next = mutator(current);
-    await writeFacebookPostsToDisk(next.posts);
-    return next.result;
+  return store.update((stored) => {
+    const next = mutator(parseStoredFacebookPosts(stored));
+    return { next: sortFacebookPosts(next.posts), result: next.result };
   });
-
-  mutationQueue = operation.then(
-    () => undefined,
-    () => undefined,
-  );
-  return operation;
 }
 
 /** Reads the public selections fresh for a page render. */
 export async function getSelectedFacebookPosts(): Promise<FacebookPost[]> {
   await connection();
-  return readFacebookPostsFromDisk();
+  return readFacebookPosts();
 }
 
 /** Reads selections in a request-time API handler. */
 export function getSelectedFacebookPostsForRequest(): Promise<FacebookPost[]> {
-  return readFacebookPostsFromDisk();
+  return readFacebookPosts();
 }
 
 export async function getSelectedFacebookPostForRequest(
   id: string,
 ): Promise<FacebookPost | undefined> {
   if (!isFacebookPostId(id)) return undefined;
-  return (await readFacebookPostsFromDisk()).find((post) => post.id === id);
+  return (await readFacebookPosts()).find((post) => post.id === id);
 }
 
 /** Adds or refreshes one admin-selected Page post snapshot. */

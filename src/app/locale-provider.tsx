@@ -100,13 +100,11 @@ export function LocaleProvider({
         ? "events"
         : pathname === "/posts"
           ? "posts"
-        : pathname === "/gallery"
-          ? "gallery"
-          : pathname === "/about"
-            ? "about"
-            : pathname === "/admin"
-              ? "admin"
-              : "home";
+        : pathname === "/about"
+          ? "about"
+          : pathname === "/admin"
+            ? "admin"
+            : "home";
     const title = pageTitle(page, dictionary);
     const description = pageDescription(page, dictionary);
     document.title = title;

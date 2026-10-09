@@ -8,7 +8,7 @@ export function localeFromSearchParams(
   return (Array.isArray(lang) ? lang[0] : lang) === "mn" ? "mn" : "en";
 }
 
-export type PageName = "home" | "about" | "gallery" | "events" | "posts" | "admin";
+export type PageName = "home" | "about" | "events" | "posts" | "admin";
 
 /* One mapping, used by the server metadata and the client <title> effect. */
 export function pageTitle(page: PageName, dictionary: Dictionary): string {
@@ -17,8 +17,6 @@ export function pageTitle(page: PageName, dictionary: Dictionary): string {
       ? dictionary.events.title
       : page === "posts"
         ? dictionary.posts.title
-      : page === "gallery"
-        ? dictionary.galleryPage.title
         : page === "about"
           ? dictionary.about.pageTitle
           : page === "admin"
@@ -35,8 +33,6 @@ export function pageDescription(
     ? dictionary.events.intro
     : page === "posts"
       ? dictionary.posts.intro
-    : page === "gallery"
-      ? dictionary.galleryPage.intro
       : page === "about"
         ? dictionary.about.pageIntro
         : page === "admin"

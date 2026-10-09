@@ -1,5 +1,5 @@
 {
-  "$comment": "Source of truth for the photograph gallery. Read by scripts/build-gallery.mjs, which crops and compresses each source into public/gallery/, and by src/components/gallery-plates.ts, which renders them in this order. Captions and alt text live in src/app/i18n.ts under gallery.items, keyed by id. The plate marked lead is rendered full width; the rest form the grid. Newest first. /about shows only the lead photo; `feature` can add previews without removing anything from /gallery's full archive.",
+  "$comment": "Source of truth for the club's photograph set. Read by scripts/build-gallery.mjs, which crops and compresses each source into public/gallery/, and by src/components/gallery-plates.ts, which selects the About photo. Captions and alt text live in src/app/i18n.ts under gallery.items, keyed by id. The plate marked lead is the About highlight; the gallery archive route is temporarily unavailable. Newest first.",
   "plates": [
     {
       "id": "mnsec-2026",

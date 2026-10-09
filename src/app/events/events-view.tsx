@@ -390,7 +390,7 @@ export default function EventsView({ events }: { events: Event[] }) {
 
   return (
     <div className="public-page events-page">
-      <section className="events-hero section-wrap" aria-labelledby="events-title">
+      <section className="events-hero events-opening section-wrap" aria-labelledby="events-title">
         <div className="section-label">
           <span>{dictionary.label}</span>
         </div>

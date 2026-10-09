@@ -40,6 +40,7 @@ Required by this app (see `.env.example`):
 |------|--------------|-------|
 | `ADMIN_PASSWORD` | production, preview | password for `/admin` |
 | `ADMIN_SESSION_SECRET` | production, preview | session signing secret |
+| `DATABASE_URL` | production | pooled Postgres (Neon) string; stores events and selected posts. Required for `/admin` saves to persist on Vercel; see section 7. Use a **separate** database or branch for preview so previews never write production content |
 | `FACEBOOK_PAGE_ID` | optional | public ID, safe to set |
 | `FACEBOOK_PAGE_ACCESS_TOKEN` | optional | secret — never print it |
 
@@ -134,7 +135,7 @@ curl -s -o /dev/null -w "%{http_code}\n" <production-url>/events   # expect 200
 ```
 
 Also open `/` and `/events` in a browser (or ask the user to). `/admin`
-loads but its save function is known-broken on Vercel — see section 7.
+saves persist only when `DATABASE_URL` is set — see section 7.
 
 ## 6. Domains
 
@@ -150,18 +151,32 @@ explicitly asked. To verify production alias after deploy:
 `vercel ls` → newest production deployment → its domain must be the one
 the user expects.
 
-## 7. Known limitation: runtime writes do not persist
+## 7. Admin storage: Postgres required on Vercel
 
-`src/lib/events.ts` writes `data/events.json` at runtime when events are
-edited in `/admin`. Vercel's filesystem is read-only except `/tmp`, so:
+Events and selected Facebook posts are stored by `src/lib/document-store.ts`.
+With `DATABASE_URL` set they live in a `site_documents` Postgres table, which
+persists across deploys and cold starts and stays consistent across serverless
+instances. Without it, the app falls back to the JSON files in `data/`, and
+Vercel's filesystem is read-only except `/tmp`, so `/admin` saves would be lost.
 
-- Public pages (read-only) work fine.
-- `/admin` event saving silently fails or loses data on redeploy/cold start.
-- Do NOT "fix" this by setting `EVENTS_FILE_PATH=/tmp/...` as a permanent
-  solution — data loss.
-- Proper fix (not done yet): move event storage to a database (Vercel
-  Postgres / Neon) or external store. Until then, treat `/admin` edits on
-  Vercel as non-persistent.
+Set up once:
+
+1. Create a Neon database (Vercel dashboard → Storage → Neon, or neon.tech).
+2. Add `DATABASE_URL` (the **pooled** string) to the `production` environment.
+   Give `preview` a different database or Neon branch, not the production one.
+3. Redeploy; changing env vars does not redeploy by itself.
+4. Sign in at `/admin` and save once. The first read of an empty database starts
+   from the `data/*.json` files bundled in the deploy, so existing content
+   appears with no import step. After the first save the database is the source
+   of truth, and later edits to `data/*.json` in the repo have no effect.
+
+Rules:
+
+- Do NOT set `EVENTS_FILE_PATH=/tmp/...` as a permanent fix — data loss.
+- Never point `TEST_DATABASE_URL` at the production database; the store tests
+  delete every row in `site_documents`.
+- Cover images are still committed under `public/events/`. The admin cannot
+  upload them, so a new event photo needs a commit and a deploy.
 
 ## 8. Guardrails (agent rules)
 

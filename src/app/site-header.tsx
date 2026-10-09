@@ -62,14 +62,6 @@ export default function SiteHeader() {
           {t.nav.about}
         </Link>
         <Link
-          href={localizedHref("/gallery", locale)}
-          onNavigate={onNavigate}
-          className={pathname === "/gallery" ? "is-active" : undefined}
-          aria-current={pathname === "/gallery" ? "page" : undefined}
-        >
-          {t.nav.gallery}
-        </Link>
-        <Link
           href={localizedHref("/events", locale)}
           onNavigate={onNavigate}
           className={isCurrentPath(pathname, "/events") ? "is-active" : undefined}
@@ -103,7 +95,6 @@ export default function SiteHeader() {
         <nav className="mobile-nav-panel" aria-label={t.nav.menu}>
           <Link href={localizedHref("/", locale)} onNavigate={onNavigate}>{t.nav.home}</Link>
           <Link href={localizedHref("/about", locale)} onNavigate={onNavigate}>{t.nav.about}</Link>
-          <Link href={localizedHref("/gallery", locale)} onNavigate={onNavigate}>{t.nav.gallery}</Link>
           <Link href={localizedHref("/events", locale)} onNavigate={onNavigate}>{t.nav.events}</Link>
           <Link href={localizedHref("/posts", locale)} onNavigate={onNavigate}>{t.nav.posts}</Link>
         </nav>

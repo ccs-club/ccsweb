@@ -240,41 +240,43 @@ export default function PostsView({ posts }: { posts: FacebookPost[] }) {
 
   return (
     <div className="public-page posts-page">
-      <section className="posts-hero section-wrap" aria-labelledby="posts-title">
-        <div className="section-label">
-          <span>{dictionary.label}</span>
-        </div>
-        <h1 id="posts-title">{dictionary.title}</h1>
-        <p>{dictionary.intro}</p>
-      </section>
-
-      <section className="posts-section section-wrap" aria-labelledby="posts-list-title">
-        <div className="posts-section-heading">
-          <div>
-            <div className="section-label">
-              <span>{dictionary.selectedLabel}</span>
-            </div>
-            <h2 id="posts-list-title">{dictionary.selected}</h2>
+      <div className="posts-opening section-wrap">
+        <section className="posts-hero" aria-labelledby="posts-title">
+          <div className="section-label">
+            <span>{dictionary.label}</span>
           </div>
-        </div>
+          <h1 id="posts-title">{dictionary.title}</h1>
+          <p>{dictionary.intro}</p>
+        </section>
 
-        {posts.length > 0 ? (
-          <FacebookPostCarousel
-            className="posts-selected-carousel"
-            posts={posts}
-            locale={locale}
-            postLabels={postLabels}
-            carouselLabels={{
-              browse: dictionary.browseSelected,
-              previous: dictionary.previousSelected,
-              next: dictionary.nextSelected,
-              position: dictionary.selectedPosition,
-            }}
-          />
-        ) : (
-          <p className="posts-empty">{dictionary.empty}</p>
-        )}
-      </section>
+        <section className="posts-section" aria-labelledby="posts-list-title">
+          <div className="posts-section-heading">
+            <div>
+              <div className="section-label">
+                <span>{dictionary.selectedLabel}</span>
+              </div>
+              <h2 id="posts-list-title">{dictionary.selected}</h2>
+            </div>
+          </div>
+
+          {posts.length > 0 ? (
+            <FacebookPostCarousel
+              className="posts-selected-carousel"
+              posts={posts}
+              locale={locale}
+              postLabels={postLabels}
+              carouselLabels={{
+                browse: dictionary.browseSelected,
+                previous: dictionary.previousSelected,
+                next: dictionary.nextSelected,
+                position: dictionary.selectedPosition,
+              }}
+            />
+          ) : (
+            <p className="posts-empty">{dictionary.empty}</p>
+          )}
+        </section>
+      </div>
 
       {informationPosts.length > 0 ? (
         <section className="posts-info-section section-wrap" aria-labelledby="posts-info-title">

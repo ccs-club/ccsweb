@@ -22,7 +22,7 @@ export const galleryPhotos: GalleryPhoto[] = gallerySpec.plates.map((plate) => (
 
 export const galleryCount = galleryPhotos.length;
 
-/* About previews come from the spec; /gallery always retains the full archive. */
+/* About's photo selection comes from the same spec that retains the archive data. */
 export const galleryHighlights: GalleryPhoto[] = galleryPhotos.filter(
   (photo, index) => photo.lead || gallerySpec.plates[index]?.feature === true,
 );

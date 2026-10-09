@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
@@ -14,6 +14,10 @@ function contrast(foreground: number[], background: number[]) {
   const a = luminance(foreground);
   const b = luminance(background);
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+async function expectNoOverflow(page: Page) {
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
 }
 
 for (const route of ["events", "admin"] as const) {
@@ -56,7 +60,6 @@ test("public hero headings keep their longest word inside the reading column", a
     ["/", ".hero h1"],
     ["/about", ".page-hero h1"],
     ["/events", ".events-hero h1"],
-    ["/gallery", ".gallery-heading-page h1"],
     ["/posts", ".posts-hero h1"],
   ] as const;
   for (const width of [240, 260, 280, 300, 320, 360, 390, 1366]) {
@@ -333,37 +336,6 @@ test("inactive archive counts meet AA contrast", async ({ page }) => {
   }
 });
 
-test("the lead photograph keeps its full row without empty tile space", async ({ page }) => {
-  const viewport = page.viewportSize()!;
-  for (const width of [viewport.width, 941, 1024]) {
-    await page.setViewportSize({ width, height: viewport.height });
-    for (const route of ["about", "gallery"]) {
-      for (const locale of ["en", "mn"]) {
-        await page.goto(`/${route}?lang=${locale}`);
-        await page.evaluate(() => document.fonts.ready);
-        const geometry = await page.locator(".gallery-cell-lead").evaluate((lead) => {
-          const tile = lead.querySelector(".gallery-tile")!;
-          return {
-            leadWidth: lead.getBoundingClientRect().width,
-            gridWidth: lead.parentElement!.getBoundingClientRect().width,
-            unusedHeight: tile.getBoundingClientRect().height
-              - tile.querySelector("img")!.getBoundingClientRect().height
-              - tile.querySelector(".gallery-tile-caption")!.getBoundingClientRect().height,
-          };
-        });
-        expect(Math.abs(geometry.leadWidth - geometry.gridWidth)).toBeLessThan(1);
-        expect(geometry.unusedHeight).toBeLessThanOrEqual(2.1);
-        if (width > 640 && route === "gallery") {
-          const supporting = await page.locator(".gallery-cell:not(.gallery-cell-lead)").evaluateAll((cells) =>
-            cells.slice(0, 2).map((cell) => cell.getBoundingClientRect().top),
-          );
-          expect(Math.abs(supporting[0] - supporting[1])).toBeLessThan(1);
-        }
-      }
-    }
-  }
-});
-
 test("narrow programme descriptions use the full reading column", async ({ page }) => {
   for (const width of [312, 390]) {
     await page.setViewportSize({ width, height: 844 });
@@ -423,28 +395,102 @@ test("admin controls have 44px targets and dark native form controls", async ({ 
   }
 });
 
-test("About keeps a single-photo preview and its compact content budget", async ({ page }) => {
+test("About keeps its photo and one-column content within the page budget", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   for (const locale of ["en", "mn"] as const) {
     await page.goto(`/about?lang=${locale}`);
     await page.evaluate(() => document.fonts.ready);
-    await expect(page.locator(".gallery-tile")).toHaveCount(1);
-    await expect(page.locator(".gallery-tile img")).toHaveAttribute("alt", dictionaries[locale].gallery.items["mnsec-2026"].alt);
-    await expect(page.locator(".gallery-total")).toHaveText(dictionaries[locale].gallery.subset.replace("{shown}", "1").replace("{total}", "18"));
-    await page.locator(".gallery-tile").click();
-    await expect(page.locator(".gallery-viewer")).toBeVisible();
-    await expect(page.locator(".gallery-viewer-controls button")).toHaveCount(1);
-    await page.keyboard.press("Escape");
-    await expect(page.locator(".gallery-viewer")).not.toBeVisible();
+    await expect(page.locator(".about-opening-photo img")).toHaveAttribute("alt", dictionaries[locale].gallery.items["mnsec-2026"].alt);
+    await expect(page.locator(".about-opening-photo .gallery-tile-caption")).toHaveCount(0);
+    await expect(page.locator(".about-opening-photo .about-gallery-status")).toHaveText(dictionaries[locale].gallery.comingSoon);
+    await expect(page.locator(".about-opening-photo a")).toHaveCount(0);
     await expect(page.locator(".program-card")).toHaveCount(3);
     const dimensions = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight }));
     expect(dimensions.width).toBe(1366);
-    expect(dimensions.height).toBeLessThanOrEqual(3100);
+    expect(dimensions.height).toBeLessThanOrEqual(3500);
   }
 });
 
-test("public pages use charcoal layers and static shield headers", async ({ page }) => {
-  for (const route of ["about", "gallery", "events", "posts"] as const) {
+test("about, events, and posts open on their own content", async ({ page }) => {
+  const viewportWidth = page.viewportSize()!.width;
+
+  for (const locale of ["en", "mn"] as const) {
+    await page.goto(`/about?lang=${locale}`);
+    await page.evaluate(() => document.fonts.ready);
+    const about = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing ${selector}`);
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      const stats = document.querySelector(".about-opening .stats-grid");
+      if (!stats) throw new Error("Missing About statistics");
+      return {
+        heading: rect(".about-opening-heading"),
+        photo: rect(".about-opening-photo"),
+        story: rect(".about-opening-story"),
+        stats: rect(".about-opening .stats-grid"),
+        statsColumns: getComputedStyle(stats).gridTemplateColumns.trim().split(/\s+/).length,
+      };
+    });
+    expect(Math.abs(about.photo.x - about.heading.x)).toBeLessThan(1);
+    expect(Math.abs(about.story.x - about.heading.x)).toBeLessThan(1);
+    expect(Math.abs(about.stats.x - about.heading.x)).toBeLessThan(1);
+    expect(about.photo.y).toBeGreaterThanOrEqual(about.heading.y + about.heading.height);
+    expect(about.story.y).toBeGreaterThanOrEqual(about.photo.y + about.photo.height);
+    expect(about.stats.y).toBeGreaterThanOrEqual(about.story.y + about.story.height);
+    expect(about.statsColumns).toBe(1);
+    await expect(page.locator(".about-opening-photo img")).toBeVisible();
+    await expect(page.locator(".about-opening-photo .gallery-tile-caption")).toHaveCount(0);
+    await expectNoOverflow(page);
+
+    await page.goto(`/events?lang=${locale}`);
+    await expect(page.locator(".events-hero h1")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    const events = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing ${selector}`);
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      return {
+        title: rect(".events-hero h1"),
+        intro: rect(".events-hero > p"),
+        index: rect(".events-stats"),
+      };
+    });
+    if (viewportWidth > 940) {
+      expect(events.index.x).toBeGreaterThan(events.title.x);
+    } else {
+      expect(events.index.y).toBeGreaterThanOrEqual(events.intro.y + events.intro.height);
+    }
+    await expectNoOverflow(page);
+
+    await page.goto(`/posts?lang=${locale}`);
+    await expect(page.locator(".posts-hero h1")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    const posts = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const element = document.querySelector(selector);
+        if (!element) throw new Error(`Missing ${selector}`);
+        const { x, y, width, height } = element.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      return {
+        intro: rect(".posts-hero"),
+        feed: rect(".posts-section"),
+      };
+    });
+    expect(posts.feed.y).toBeGreaterThanOrEqual(posts.intro.y + posts.intro.height + 36);
+    await expect(page.locator(".posts-section .facebook-post-card")).toHaveCount(1);
+    await expectNoOverflow(page);
+  }
+});
+
+test("public pages use charcoal layers without dotted shield marks", async ({ page }) => {
+  for (const route of ["about", "events", "posts"] as const) {
     for (const locale of ["en", "mn"] as const) {
       await page.goto(`/${route}?lang=${locale}`);
       const root = page.locator(".public-page");
@@ -456,9 +502,6 @@ test("public pages use charcoal layers and static shield headers", async ({ page
           `${dictionaries[locale].join.titleLine1} ${dictionaries[locale].join.titleAccent}`,
         );
         await expect(page.locator(".join-inner > p")).toHaveText(dictionaries[locale].join.body);
-      } else if (route === "gallery") {
-        await expect(page.locator(".gallery-heading-page > p")).toHaveCSS("font-size", "17px");
-        await expect(page.locator(".gallery-tile-caption").first()).toHaveCSS("font-size", "13px");
       } else if (route === "events") {
         await expect(page.locator(".events-hero > p")).toHaveCSS("font-size", "17px");
         await expect(page.locator(".year-grid button").first()).toHaveCSS("font-size", "13px");
@@ -469,16 +512,9 @@ test("public pages use charcoal layers and static shield headers", async ({ page
       }
       await expect(root).toHaveCSS("--surface-2", "#202020");
       await expect(root).toHaveCSS("--fg-4", "#949494");
-      const header = page.locator(".page-hero, .events-hero, .posts-hero, .gallery-heading-page");
-      const motif = await header.evaluate((element) => {
-        const style = getComputedStyle(element, "::after");
-        return { mask: style.maskImage, opacity: style.opacity, animation: style.animationName, pointerEvents: style.pointerEvents };
-      });
-      expect(motif.mask).toContain("ccs-logo.png");
-      expect(motif.mask).toContain("repeating-linear-gradient");
-      expect(motif.opacity).toBe("0.5");
-      expect(motif.animation).toBe("none");
-      expect(motif.pointerEvents).toBe("none");
+      const header = page.locator(".page-hero, .events-hero, .posts-hero");
+      const motifMask = await header.evaluate((element) => getComputedStyle(element, "::after").maskImage);
+      expect(motifMask).toBe("none");
       const screenshot = await page.screenshot({ fullPage: true });
       expect((await sharp(screenshot).metadata()).width).toBe(page.viewportSize()!.width);
       for (const background of [[16, 16, 16], [22, 22, 22], [32, 32, 32], [38, 38, 38]]) {
@@ -500,8 +536,6 @@ test("public pages use charcoal layers and static shield headers", async ({ page
           return getComputedStyle(section, "::before").display;
         });
         expect(bandState).toBe("none");
-      } else {
-        await expect(page.locator(".gallery-tile").first()).toHaveCSS("background-color", "rgb(32, 32, 32)");
       }
     }
   }

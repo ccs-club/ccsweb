@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowIcon } from "@/app/icons";
-import PhotoGallery from "@/components/photo-gallery";
-import { galleryCount, galleryHighlightCount, galleryHighlights } from "@/components/gallery-plates";
+import { galleryHighlights } from "@/components/gallery-plates";
 import { localizedHref, useLocale } from "@/app/locale-provider";
 import { JOIN_URL } from "@/lib/site-config";
 import clubStats from "@/data/club-stats.json";
 
 export default function AboutView() {
   const { dictionary: t, locale } = useLocale();
+  const aboutPhoto = galleryHighlights[0];
+  const aboutPhotoAlt = t.gallery.items[aboutPhoto.id as keyof typeof t.gallery.items].alt;
   const stats = [
     { value: clubStats.founded, label: t.stats.founded },
     { value: clubStats.membersSpring2025_26, label: t.stats.members },
@@ -18,16 +20,27 @@ export default function AboutView() {
 
   return (
     <div className="public-page about-page">
-      <section className="page-hero section-wrap" aria-labelledby="about-title">
-        <div className="section-label">
-          <span>{t.about.label}</span>
+      <section className="about-opening section-wrap" aria-labelledby="about-title">
+        <div className="page-hero about-opening-heading">
+          <div className="section-label">
+            <span>{t.about.label}</span>
+          </div>
+          <h1 id="about-title">{t.about.pageTitle}</h1>
+          <p>{t.about.pageIntro}</p>
         </div>
-        <h1 id="about-title">{t.about.pageTitle}</h1>
-        <p>{t.about.pageIntro}</p>
-      </section>
 
-      <section className="about-section section-wrap" id="about">
-        <div className="about-copy">
+        <div className="about-opening-photo">
+          <Image
+            src={aboutPhoto.src}
+            alt={aboutPhotoAlt}
+            width={aboutPhoto.width}
+            height={aboutPhoto.height}
+            sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 900px) calc(100vw - 64px), 836px"
+          />
+          <p className="about-gallery-status">{t.gallery.comingSoon}</p>
+        </div>
+
+        <section className="about-section about-copy about-opening-story" id="about">
           <h2>
             {t.about.titleLine1}
             <br />
@@ -40,7 +53,7 @@ export default function AboutView() {
               {t.about.link} <ArrowIcon />
             </a>
           </div>
-        </div>
+        </section>
 
         <div className="stats-grid" role="group" aria-label={t.stats.label}>
           {stats.map((stat) => (
@@ -49,30 +62,6 @@ export default function AboutView() {
               <span>{stat.label}</span>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Keep the About preview small; the complete archive lives on /gallery. */}
-      <section className="gallery-section gallery-section-about" aria-labelledby="gallery-title">
-        <div className="gallery-inner section-wrap">
-          <div className="gallery-heading">
-            <div className="section-label">
-              <span>{t.gallery.label}</span>
-              <span className="gallery-total" aria-hidden="true">
-                {t.gallery.subset
-                  .replace("{shown}", String(galleryHighlightCount))
-                  .replace("{total}", String(galleryCount))}
-              </span>
-            </div>
-            <h2 id="gallery-title">{t.gallery.title}</h2>
-            <p>{t.gallery.body}</p>
-          </div>
-
-          <PhotoGallery photos={galleryHighlights} t={t.gallery} />
-
-          <a className="text-link gallery-more" href={localizedHref("/gallery", locale)}>
-            {t.gallery.seeAll.replace("{count}", String(galleryCount))} <ArrowIcon />
-          </a>
         </div>
       </section>
 

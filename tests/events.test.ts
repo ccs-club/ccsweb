@@ -26,6 +26,9 @@ const draft = {
 test("event validation, serialized writes and revision conflicts", async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "ccs-events-test-"));
   const previousPath = process.env.EVENTS_FILE_PATH;
+  const previousDatabaseUrl = process.env.DATABASE_URL;
+  // These tests exercise the file store; never let them reach a real database.
+  delete process.env.DATABASE_URL;
   process.env.EVENTS_FILE_PATH = path.join(directory, "events.json");
   await writeFile(process.env.EVENTS_FILE_PATH, "[]\n");
   const store = await import("../src/lib/events");
@@ -79,6 +82,7 @@ test("event validation, serialized writes and revision conflicts", async (t) => 
   } finally {
     if (previousPath === undefined) delete process.env.EVENTS_FILE_PATH;
     else process.env.EVENTS_FILE_PATH = previousPath;
+    if (previousDatabaseUrl !== undefined) process.env.DATABASE_URL = previousDatabaseUrl;
     await rm(directory, { recursive: true, force: true });
   }
 });

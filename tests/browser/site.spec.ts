@@ -1,7 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import type { Event } from "../../src/lib/event-types";
 import { dictionaries } from "../../src/app/i18n";
-import gallerySpec from "../../src/data/gallery.json";
 
 const password = "test-only-admin-password";
 const draft = {
@@ -56,7 +55,7 @@ test("public routes render both languages without console errors or overflow", a
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
-  for (const route of ["/", "/about", "/gallery", "/events", "/posts"]) {
+  for (const route of ["/", "/about", "/events", "/posts"]) {
     for (const lang of ["en", "mn"]) {
       const response = await page.goto(`${route}?lang=${lang}`);
       expect(response?.status()).toBe(200);
@@ -84,48 +83,19 @@ test("locale controls and navigation reach real routes", async ({ page, isMobile
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 });
 
-test("gallery opens, steps and closes with buttons and keyboard", async ({ page }) => {
-  await page.goto("/gallery");
-  const tile = page.locator(".gallery-tile").first();
-  await tile.focus();
-  await page.keyboard.press("Enter");
-  const dialog = page.getByRole("dialog");
-  await expect(dialog).toBeVisible();
-  await expect(page.locator(".gallery-viewer-count")).toHaveText("1 of 18");
-  await page.getByRole("button", { name: "Next photograph", exact: true }).click();
-  await expect(page.locator(".gallery-viewer-count")).toHaveText("2 of 18");
-  await page.keyboard.press("ArrowLeft");
-  await expect(page.locator(".gallery-viewer-count")).toHaveText("1 of 18");
-  await page.getByRole("button", { name: "Previous photograph", exact: true }).click();
-  await expect(page.locator(".gallery-viewer-count")).toHaveText("18 of 18");
-  await page.getByRole("button", { name: "Close", exact: true }).click();
-  await expect(dialog).not.toBeVisible();
-  await tile.click();
-  await page.keyboard.press("Escape");
-  await expect(dialog).not.toBeVisible();
-  await expect(tile).toBeFocused();
-});
-
-test("every gallery caption and alt text renders in both languages", async ({ page }) => {
+test("the gallery page is unavailable and About keeps the photo without a dead link", async ({ page }) => {
   for (const locale of ["en", "mn"] as const) {
-    await page.goto(`/gallery?lang=${locale}`);
-    await expect(page.locator("html")).toHaveAttribute("lang", locale);
-    const tiles = page.locator(".gallery-tile");
-    await expect(tiles).toHaveCount(gallerySpec.plates.length);
-    const items = dictionaries[locale].gallery.items;
-    await tiles.first().click();
-    for (const [index, plate] of gallerySpec.plates.entries()) {
-      const item = items[plate.id as keyof typeof items];
-      await expect(tiles.nth(index).locator("img")).toHaveAttribute("alt", item.alt);
-      await expect(tiles.nth(index).locator(".gallery-tile-caption")).toHaveText(item.caption);
-      await expect(page.locator(".gallery-viewer-caption > span").last()).toHaveText(item.caption);
-      await expectNoOverflow(page);
-      const next = page.getByRole("button", { name: dictionaries[locale].gallery.next, exact: true });
-      await next.click();
-    }
-    await page.keyboard.press("Escape");
-    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await page.goto(`/about?lang=${locale}`);
+    await expect(page.locator(".about-opening-photo .about-gallery-status")).toHaveText(dictionaries[locale].gallery.comingSoon);
+    await expect(page.locator('.about-opening-photo a[href^="/gallery"]')).toHaveCount(0);
+    await expect(page.locator('nav a[href^="/gallery"]')).toHaveCount(0);
+
+    const response = await page.goto(`/gallery?lang=${locale}`);
+    expect(response?.status()).toBe(404);
   }
+  const sitemap = await page.request.get("/sitemap.xml");
+  expect(sitemap.status()).toBe(200);
+  expect(await sitemap.text()).not.toContain("/gallery");
 });
 
 test("only admin-curated Facebook snapshots appear on the posts page", async ({ page }) => {

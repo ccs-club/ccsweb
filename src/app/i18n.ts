@@ -7,7 +7,6 @@ export const dictionaries = {
     nav: {
       home: "Home",
       about: "About",
-      gallery: "Gallery",
       events: "Events",
       posts: "Posts",
       menu: "Menu",
@@ -43,10 +42,6 @@ export const dictionaries = {
         "We run competitions, lecture series, and practical sessions for students interested in information security.",
       link: "What we run",
     },
-    galleryPage: {
-      title: "CCS photo gallery",
-      intro: "Browse photos from CCS events and gatherings. Select one to view it full size.",
-    },
     gallery: {
       label: "Gallery",
       title: "CCS in pictures",
@@ -54,6 +49,7 @@ export const dictionaries = {
       total: "{count} photographs",
       subset: "{shown} of {total}",
       seeAll: "See all {count} photographs",
+      comingSoon: "Gallery coming soon...",
       empty: "No photographs are available yet.",
       missing: "This photograph could not be loaded.",
       viewerLabel: "Photograph viewer",
@@ -388,7 +384,6 @@ export const dictionaries = {
     nav: {
       home: "Нүүр",
       about: "Клубын тухай",
-      gallery: "Зургийн цомог",
       events: "Арга хэмжээ",
       posts: "Нийтлэл",
       menu: "Цэс",
@@ -424,11 +419,6 @@ export const dictionaries = {
         "Бид мэдээллийн аюулгүй байдлыг сонирхдог оюутнуудад зориулж тэмцээн, лекц, практик сургалт зохион байгуулдаг.",
       link: "Хөтөлбөрүүд",
     },
-    galleryPage: {
-      title: "CCS клубын гэрэл зургийн цомог",
-      intro:
-        "CCS-ийн арга хэмжээ, уулзалтын үеийн зургууд. Томоор үзэх зургаа сонгоно уу.",
-    },
     gallery: {
       label: "Зургийн цомог",
       title: "CCS-ийн гэрэл зургууд",
@@ -436,6 +426,7 @@ export const dictionaries = {
       total: "{count} зураг",
       subset: "{total} зургаас {shown} нь",
       seeAll: "Бүх {count} зургийг үзэх",
+      comingSoon: "Зургийн цомог удахгүй...",
       empty: "Одоогоор зураг алга байна.",
       missing: "Зургийг ачаалж чадсангүй.",
       viewerLabel: "Зургийг томоор үзэх",

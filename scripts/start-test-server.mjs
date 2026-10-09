@@ -18,6 +18,7 @@ const child = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start
     ...process.env,
     ADMIN_PASSWORD: "test-only-admin-password",
     ADMIN_SESSION_SECRET: "test-only-session-secret-at-least-32-characters",
+    DATABASE_URL: "",
     EVENTS_FILE_PATH: eventsFile,
     FACEBOOK_POSTS_FILE_PATH: facebookPostsFile,
     FACEBOOK_PAGE_ID: "",

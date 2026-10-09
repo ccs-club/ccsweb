@@ -66,8 +66,6 @@ install the prebuilt binaries instead.
   club's proposition, and its founding year, membership and competition turnout
 - `/about`: the club's story, its statistics, photographs of members at real
   events, the programs it runs, and the join call
-- `/gallery`: the full set of club photographs, newest first, each opening in a
-  keyboard-navigable viewer
 - `/events`: compact event archive with featured, upcoming and year-filtered
   past events
 - `/posts`: Facebook Page posts explicitly selected by a site admin
@@ -111,8 +109,8 @@ changes. The draft stays only in the current tab's memory; do not reload or
 close the tab before saving. Navigation warnings remain active during login.
 Signing out deliberately discards the draft after confirmation.
 
-Set `EVENTS_FILE_PATH` when the persistent event file is mounted somewhere
-other than `data/events.json`.
+With file storage, set `EVENTS_FILE_PATH` when the persistent event file is
+mounted somewhere other than `data/events.json`. See [Storage](#storage).
 
 ## Publishing selected Facebook posts
 
@@ -147,24 +145,44 @@ it with the protected refresh control after deployment, and rotate it whenever
 it expires, is revoked, or may have been exposed. Do not use a `NEXT_PUBLIC_`
 name for either Facebook setting.
 
-Set `FACEBOOK_POSTS_FILE_PATH` when the selected-post file is mounted somewhere
-other than `data/facebook-posts.json`.
+With file storage, set `FACEBOOK_POSTS_FILE_PATH` when the selected-post file is
+mounted somewhere other than `data/facebook-posts.json`.
 
-### Deployment requirement
+### Storage
 
-The file-backed admin requires a Node.js server with a **persistent writable
-filesystem** and one writer process. This applies to both `events.json` and
-`facebook-posts.json`. It works on a VPS, one container with a
-mounted volume, or a similar host. Do not scale the file-backed admin to
-multiple replicas without replacing the store with transactional shared
-storage. The login limiter is process-local; if the app sits behind a proxy,
+Events and selected Facebook posts are each one JSON document, stored in one of
+two places:
+
+- **Postgres (production).** Set `DATABASE_URL` to a Postgres connection string,
+  such as the pooled string from Neon or the Vercel Neon integration. The app
+  creates a `site_documents` table on first use. Writers are serialized with a
+  Postgres advisory lock, so edits stay atomic across serverless instances and
+  persist across redeploys.
+- **JSON files (local development, tests, single-host deployments).** With no
+  `DATABASE_URL`, the app reads and writes `data/events.json` and
+  `data/facebook-posts.json`, or the paths in `EVENTS_FILE_PATH` and
+  `FACEBOOK_POSTS_FILE_PATH`. This needs a persistent writable filesystem and a
+  single writer process, so it does not work on Vercel.
+
+When `DATABASE_URL` is set the file paths are ignored. A database with no
+stored document yet starts from the bundled `data/events.json` and
+`data/facebook-posts.json`, so a first deploy shows the existing content with no
+separate import step. After the first admin save the database is the source of
+truth, and later edits to those files in the repository no longer apply.
+
+To run the Postgres store tests, point `TEST_DATABASE_URL` at a disposable
+database. The tests delete every row in `site_documents`, so never use a
+database that holds real content:
+
+```bash
+TEST_DATABASE_URL=postgres://postgres@localhost:5432/ccs_test npm test
+```
+
+The login limiter is still process-local. If the app sits behind a proxy,
 configure the proxy to replace forwarded client-IP headers, and use shared
-rate-limit storage when running more than one instance. A serverless/Vercel
-deployment may not preserve runtime writes, so
-deploy the admin with a durable storage adapter before relying on it for club
-updates.
-The public site can still be built and served normally, but changes made in a
-non-persistent server environment will disappear on restart/redeploy.
+rate-limit storage when running more than one instance. Cover images are not
+uploaded through the admin: a new image still has to be added under
+`public/events/` and deployed before an event can reference it.
 
 ## Design decisions
 
@@ -207,9 +225,9 @@ permissions. Only publish images that the club has permission to share.
 `gallery/` holds the club's full-resolution source photography. It sits outside
 `public/`, so Next.js never serves it and it costs nothing at runtime.
 
-Eighteen of those photographs are published, on `/about` and on `/gallery`. The
-cropped, compressed WebP versions live in `public/gallery/` and are generated,
-not hand-edited:
+The About page currently uses the MNSEC lead photograph. The cropped,
+compressed WebP versions live in `public/gallery/` and are generated, not
+hand-edited; the gallery archive page is temporarily unavailable:
 
 ```bash
 node scripts/build-gallery.mjs
@@ -226,15 +244,16 @@ The set is ordered newest first. The grid is flex with a `flex-basis` floor, so 
 short final row shares the width rather than leaving a hole, and adding a photo
 cannot recreate that problem.
 
-### Which page shows what
+### About photograph
 
-`/gallery` is the archive and shows all eighteen. `/about` shows only the MNSEC
-lead photograph and links to the archive. On desktop, that preview sits beside
-its introduction; narrower layouts stack it below. Two pages showing the same set was a
-finding in `anti-slop/audit-002-2026-09-29.md`, and the split also puts the three
-club-designed posters (2020 and 2022, which carry their own printed date frames)
-in the archive where they belong instead of beside current photographs in the
-band. Change the selection by toggling `feature` in the spec.
+`/about` uses one reading column at every width: introduction, MNSEC photo,
+story, then a vertical list of four club facts. Its width is capped so the image
+and prose stay within the same readable measure. The `/gallery` archive page is
+temporarily unavailable; its source data, image assets, and copy checks remain
+in place.
+The three club-designed posters (2020 and 2022, which carry their own printed
+date frames) remain in the source set rather than the About highlight. Change
+the selection by toggling `feature` in the spec.
 
 `banksec-6-2025` in the gallery and the BANKSEC #6 cover on `/events` are two
 different frames of the same group shot. The `/events` cover is the wider one with
