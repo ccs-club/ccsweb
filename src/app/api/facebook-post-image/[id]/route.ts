@@ -1,9 +1,16 @@
-import { getPublishedFacebookPostPicture } from "@/lib/facebook";
+import {
+  getPublishedFacebookPostPicture,
+  getPublishedFacebookPosts,
+} from "@/lib/facebook";
 import {
   getSelectedFacebookPostForRequest,
   refreshSelectedFacebookPostPicture,
 } from "@/lib/facebook-posts";
-import { isFacebookImageUrl } from "@/lib/facebook-post-types";
+import {
+  isFacebookImageUrl,
+  isFacebookInfoPost,
+  type FacebookPost,
+} from "@/lib/facebook-post-types";
 
 export const runtime = "nodejs";
 
@@ -114,11 +121,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await params;
-  let post;
+  let selectedPost: FacebookPost | undefined;
   try {
-    post = await getSelectedFacebookPostForRequest(id);
+    selectedPost = await getSelectedFacebookPostForRequest(id);
   } catch {
     return unavailableImage();
+  }
+
+  let post: FacebookPost | undefined = selectedPost;
+  if (!post) {
+    try {
+      post = (await getPublishedFacebookPosts()).find(
+        (candidate) => candidate.id === id && isFacebookInfoPost(candidate),
+      );
+    } catch {
+      return unavailableImage();
+    }
   }
   if (!post) return unavailableImage();
 
@@ -138,17 +156,21 @@ export async function GET(
     }
     if (!freshPicture) return unavailableImage();
 
-    let selectedPost;
-    try {
-      selectedPost = await refreshSelectedFacebookPostPicture(
-        id,
-        pictureUrl,
-        freshPicture,
-      );
-    } catch {
-      return unavailableImage();
+    if (selectedPost) {
+      let refreshedSelectedPost: FacebookPost | undefined;
+      try {
+        refreshedSelectedPost = await refreshSelectedFacebookPostPicture(
+          id,
+          pictureUrl,
+          freshPicture,
+        );
+      } catch {
+        return unavailableImage();
+      }
+      pictureUrl = refreshedSelectedPost?.fullPicture;
+    } else {
+      pictureUrl = freshPicture;
     }
-    pictureUrl = selectedPost?.fullPicture;
     if (!pictureUrl || !isFacebookImageUrl(pictureUrl)) {
       return unavailableImage();
     }

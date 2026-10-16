@@ -30,13 +30,36 @@ test("image route refreshes an expired Facebook image URL and stores replacement
   await writeFile(postsFile, `${JSON.stringify([post])}\n`);
 
   let expiredImageRequests = 0;
+  let freshImageRequests = 0;
+  let pageFeedRequests = 0;
+  const unselectedId = "110700467422954_12345678901234568";
   globalThis.fetch = async (input) => {
     const url = new URL(String(input));
     if (url.origin === "https://graph.facebook.com") {
-      assert.equal(url.pathname, `/v26.0/${post.id}`);
-      assert.equal(url.searchParams.get("fields"), "id,full_picture");
       assert.equal(url.searchParams.get("access_token"), "test-page-access-token");
-      return Response.json({ id: post.id, full_picture: freshPicture });
+      if (url.pathname === `/v26.0/${post.id}`) {
+        assert.equal(url.searchParams.get("fields"), "id,full_picture");
+        return Response.json({ id: post.id, full_picture: freshPicture });
+      }
+      if (url.pathname === "/v26.0/110700467422954/published_posts") {
+        pageFeedRequests += 1;
+        return Response.json({ data: [
+          {
+            id: post.id,
+            message: `${post.message} #ccsinfo`,
+            created_time: post.createdTime,
+            permalink_url: post.permalinkUrl,
+            full_picture: freshPicture,
+          },
+          {
+            id: unselectedId,
+            message: "Regular unselected post.",
+            created_time: post.createdTime,
+            permalink_url: "https://www.facebook.com/ccs.cybersec.club/posts/12345678901234568",
+            full_picture: freshPicture,
+          },
+        ] });
+      }
     }
     if (url.hostname === "scontent.fbcdn.net" && url.pathname === "/expired.jpg") {
       expiredImageRequests += 1;
@@ -46,6 +69,7 @@ test("image route refreshes an expired Facebook image URL and stores replacement
       });
     }
     if (url.hostname === "scontent.fbcdn.net" && url.pathname === "/fresh.jpg") {
+      freshImageRequests += 1;
       return new Response(imageBytes, {
         headers: { "Content-Type": "image/jpeg" },
       });
@@ -67,6 +91,26 @@ test("image route refreshes an expired Facebook image URL and stores replacement
     const stored = JSON.parse(await readFile(postsFile, "utf8"));
     assert.equal(stored[0].fullPicture, freshPicture);
     assert.equal(stored[0].message, post.message);
+
+    const { removeSelectedFacebookPost } = await import("../src/lib/facebook-posts");
+    assert.equal(await removeSelectedFacebookPost(post.id), true);
+
+    const informationImage = await GET(
+      new Request(`https://ccs.example/api/facebook-post-image/${post.id}`),
+      { params: Promise.resolve({ id: post.id }) },
+    );
+    assert.equal(informationImage.status, 200);
+    assert.deepEqual(new Uint8Array(await informationImage.arrayBuffer()), imageBytes);
+
+    const regularImage = await GET(
+      new Request(`https://ccs.example/api/facebook-post-image/${unselectedId}`),
+      { params: Promise.resolve({ id: unselectedId }) },
+    );
+    assert.equal(regularImage.status, 404);
+    assert.equal(expiredImageRequests, 0);
+    assert.equal(freshImageRequests, 2);
+    assert.equal(pageFeedRequests, 1);
+    assert.deepEqual(JSON.parse(await readFile(postsFile, "utf8")), []);
   } finally {
     globalThis.fetch = originalFetch;
     if (previousPath === undefined) delete process.env.FACEBOOK_POSTS_FILE_PATH;
