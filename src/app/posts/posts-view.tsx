@@ -21,7 +21,7 @@ const MONTHS_EN = [
   "Dec",
 ] as const;
 
-const INFO_POST_MARKER = /(?:^|[^\p{L}\p{N}_])#ccs-info(?=$|[^\p{L}\p{N}_])/iu;
+const INFO_POST_MARKER = /(?:^|[^\p{L}\p{N}_])#ccsinfo(?=$|[^\p{L}\p{N}_])/iu;
 
 type CarouselLabels = {
   browse: string;

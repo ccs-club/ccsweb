@@ -24,7 +24,7 @@ const posts = [
   },
   {
     id: "110700467422954_12345678901234002",
-    message: "Information update. #ccs-info",
+    message: "Information update. #ccsinfo",
     createdTime: "2026-06-03T08:30:00+0000",
     permalinkUrl: "https://www.facebook.com/ccs.cybersec.club/posts/12345678901234002",
   },
@@ -36,7 +36,7 @@ const posts = [
   },
   {
     id: "110700467422954_12345678901234004",
-    message: "Another information update. #CCS-INFO",
+    message: "Another information update. #CCSINFO",
     createdTime: "2026-06-01T08:30:00+0000",
     permalinkUrl: "https://www.facebook.com/ccs.cybersec.club/posts/12345678901234004",
   },
@@ -63,8 +63,8 @@ for (const locale of ["en", "mn"] as const) {
       await expect(selectedTrack).toHaveAttribute("aria-label", dictionary.browseSelected);
       await expect(selectedTrack).toHaveCSS("overflow-x", "auto");
       await expect(information.locator(".facebook-post-card")).toHaveCount(2);
-      await expect(information).toContainText("#ccs-info");
-      await expect(information).toContainText("#CCS-INFO");
+      await expect(information).toContainText("#ccsinfo");
+      await expect(information).toContainText("#CCSINFO");
       await expect(information).not.toContainText("A regular selected update.");
       const infoBand = await page.locator(".posts-info-section").evaluate((section) => (
         getComputedStyle(section, "::before").display

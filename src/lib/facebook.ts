@@ -1,5 +1,7 @@
 import {
   facebookPostFromGraph,
+  isFacebookImageUrl,
+  isFacebookPostId,
   type FacebookPost,
 } from "./facebook-post-types";
 
@@ -119,4 +121,48 @@ export async function getPublishedFacebookPosts({
     });
 
   return pendingRequest;
+}
+
+export async function getPublishedFacebookPostPicture(
+  id: string,
+): Promise<string | undefined> {
+  const config = getFacebookConfig();
+  if (!config || !isFacebookPostId(id)) {
+    throw new FacebookPostsUnavailableError();
+  }
+
+  const url = new URL(`${GRAPH_ORIGIN}/${GRAPH_VERSION}/${id}`);
+  url.search = new URLSearchParams({
+    fields: "id,full_picture",
+    access_token: config.accessToken,
+  }).toString();
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      redirect: "error",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch {
+    throw new FacebookPostsUnavailableError();
+  }
+
+  if (!response.ok) throw new FacebookPostsUnavailableError();
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new FacebookPostsUnavailableError();
+  }
+
+  if (!isRecord(body) || body.id !== id) {
+    throw new FacebookPostsUnavailableError();
+  }
+
+  return typeof body.full_picture === "string" && isFacebookImageUrl(body.full_picture)
+    ? body.full_picture
+    : undefined;
 }

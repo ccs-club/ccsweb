@@ -119,7 +119,7 @@ Facebook's full feed into a public site feed. A signed-in administrator first
 uses **Refresh published posts**, then selects the posts that belong on the
 site. Removing a selection removes it from the public page. The public page
 reads `data/facebook-posts.json` at request time. All selected posts appear in
-the horizontal post browser. A selected post containing `#ccs-info` also
+the horizontal post browser. A selected post containing `#ccsinfo` also
 appears in the Information section below; the marker remains part of the
 original Facebook text.
 
