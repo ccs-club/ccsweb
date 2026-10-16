@@ -13,8 +13,16 @@ import {
 import { localizedHref, useLocale } from "./locale-provider";
 
 const socialLinks = [
-  { name: "Facebook", href: "https://www.facebook.com/ccs.cybersec.club", Icon: FacebookIcon },
-  { name: "Instagram", href: "https://www.instagram.com/sict_ccsclub/", Icon: InstagramIcon },
+  {
+    name: "Facebook",
+    href: "https://www.facebook.com/ccs.cybersec.club",
+    Icon: FacebookIcon,
+  },
+  {
+    name: "Instagram",
+    href: "https://www.instagram.com/sict_ccsclub/",
+    Icon: InstagramIcon,
+  },
   { name: "Discord", href: "https://discord.gg/egsZnzur", Icon: DiscordIcon },
   {
     name: "YouTube",
@@ -53,10 +61,12 @@ export default function SiteFooter() {
         <div className="footer-group">
           <h2 className="footer-heading">{t.footer.contact}</h2>
           <address className="footer-contact-links">
-            <a href="tel:+97680683288">8068 3288</a>
-            <a href="tel:+97695558915">9555 8915</a>
+            <a href="tel:+97694225500">9422 5500</a>
+            <a href="tel:+97695851384">9585 1384</a>
             <a href="mailto:sict.ccsclub@gmail.com">
-              sict.ccsclub@<wbr />gmail.com
+              sict.ccsclub@
+              <wbr />
+              gmail.com
             </a>
             <a
               className="footer-location"
@@ -74,12 +84,7 @@ export default function SiteFooter() {
           <h2 className="footer-heading">{t.footer.follow}</h2>
           <nav className="footer-social-links" aria-label={t.footer.follow}>
             {socialLinks.map(({ name, href, Icon }) => (
-              <a
-                key={name}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <a key={name} href={href} target="_blank" rel="noreferrer">
                 <Icon />
                 {name}
               </a>
