@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
+import { getInformationFacebookPosts } from "../src/lib/facebook-post-types";
 
 const post = {
   id: "110700467422954_12345678901234567",
@@ -10,6 +11,46 @@ const post = {
   createdTime: "2026-06-01T08:30:00+0000",
   permalinkUrl: "https://www.facebook.com/ccs.cybersec.club/posts/12345678901234567",
 };
+
+test("information posts include recent tagged Page posts outside the selected carousel", () => {
+  const selectedTagged = {
+    ...post,
+    id: "110700467422954_12345678901234561",
+    message: "Selected #ccsinfo post.",
+  };
+  const selectedRegular = {
+    ...post,
+    id: "110700467422954_12345678901234562",
+    message: "Regular selected post.",
+  };
+  const selectedArchived = {
+    ...post,
+    id: "110700467422954_12345678901234563",
+    message: "Archived #ccsinfo post.",
+    createdTime: "2026-05-01T08:30:00+0000",
+  };
+  const recentUpdated = {
+    ...selectedTagged,
+    message: "Updated post without tag.",
+    createdTime: "2026-06-04T08:30:00+0000",
+  };
+  const recentUnselected = {
+    ...post,
+    id: "110700467422954_12345678901234564",
+    message: "Unselected #CCSINFO post.",
+    createdTime: "2026-06-03T08:30:00+0000",
+  };
+
+  const informationPosts = getInformationFacebookPosts(
+    [selectedTagged, selectedRegular, selectedArchived],
+    [recentUpdated, recentUnselected],
+  );
+
+  assert.deepEqual(
+    informationPosts.map((item) => item.id),
+    [recentUnselected.id, selectedArchived.id],
+  );
+});
 
 test("Facebook post selections validate, serialize, and retain concurrent writes", async (t) => {
   const directory = await mkdtemp(path.join(os.tmpdir(), "ccs-facebook-posts-test-"));

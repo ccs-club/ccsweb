@@ -10,8 +10,8 @@ test("public page copy is clear and complete in both languages", () => {
   assert.equal(dictionaries.mn.posts.title, "CCS-ийн шинэ мэдээлэл.");
   assert.equal(dictionaries.en.posts.info, "CCS information");
   assert.equal(dictionaries.mn.posts.info, "CCS-ийн мэдээлэл");
-  assert.equal(dictionaries.en.admin.facebookInfoHint, "A selected post containing #ccsinfo also appears in the Information section on /posts.");
-  assert.equal(dictionaries.mn.admin.facebookInfoHint, "#ccsinfo шошготой сонгосон нийтлэл /posts хуудасны Мэдээлэл хэсэгт мөн гарна.");
+  assert.equal(dictionaries.en.admin.facebookInfoHint, "Recent Page posts containing #ccsinfo appear in the Information section on /posts, even when not selected for the carousel.");
+  assert.equal(dictionaries.mn.admin.facebookInfoHint, "#ccsinfo шошготой сүүлийн үеийн Facebook нийтлэлүүд сонгогдоогүй байсан ч /posts хуудасны Мэдээлэл хэсэгт автоматаар гарна.");
   assert.equal(dictionaries.en.admin.selectFacebookPost, "Show on site");
   assert.equal(dictionaries.mn.admin.selectFacebookPost, "Сайтад харуулах");
   assert.equal(`${dictionaries.en.join.titleLine1} ${dictionaries.en.join.titleAccent}`, "Join us.");

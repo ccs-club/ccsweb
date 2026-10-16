@@ -6,7 +6,30 @@ export type FacebookPost = {
   fullPicture?: string;
 };
 
+const INFO_POST_MARKER = /(?:^|[^\p{L}\p{N}_])#ccsinfo(?=$|[^\p{L}\p{N}_])/iu;
 const MAX_MESSAGE_LENGTH = 12_000;
+
+export function isFacebookInfoPost(post: FacebookPost): boolean {
+  return INFO_POST_MARKER.test(post.message);
+}
+
+export function getInformationFacebookPosts(
+  selectedPosts: FacebookPost[],
+  recentPagePosts: FacebookPost[],
+): FacebookPost[] {
+  const latestById = new Map(recentPagePosts.map((post) => [post.id, post]));
+  const posts = new Map<string, FacebookPost>();
+
+  for (const selectedPost of selectedPosts) {
+    const post = latestById.get(selectedPost.id) ?? selectedPost;
+    posts.set(post.id, post);
+  }
+  for (const post of recentPagePosts) posts.set(post.id, post);
+
+  return [...posts.values()]
+    .filter(isFacebookInfoPost)
+    .sort((a, b) => b.createdTime.localeCompare(a.createdTime));
+}
 const MAX_URL_LENGTH = 2_000;
 const POST_ID_PATTERN = /^\d{5,30}(?:_\d{5,30})?$/;
 const CREATED_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})$/;

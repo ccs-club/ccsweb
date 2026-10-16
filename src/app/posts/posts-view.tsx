@@ -21,8 +21,6 @@ const MONTHS_EN = [
   "Dec",
 ] as const;
 
-const INFO_POST_MARKER = /(?:^|[^\p{L}\p{N}_])#ccsinfo(?=$|[^\p{L}\p{N}_])/iu;
-
 type CarouselLabels = {
   browse: string;
   previous: string;
@@ -44,10 +42,6 @@ function formatPostDate(value: string, locale: "en" | "mn"): string {
 
   if (locale === "mn") return `${year} оны ${month + 1} дүгээр сарын ${day}`;
   return `${MONTHS_EN[month]} ${day}, ${year}`;
-}
-
-function isInformationPost(post: FacebookPost): boolean {
-  return INFO_POST_MARKER.test(post.message);
 }
 
 function FacebookPostImage({ id }: { id: string }) {
@@ -228,7 +222,13 @@ function FacebookPostCarousel({
   );
 }
 
-export default function PostsView({ posts }: { posts: FacebookPost[] }) {
+export default function PostsView({
+  posts,
+  informationPosts,
+}: {
+  posts: FacebookPost[];
+  informationPosts: FacebookPost[];
+}) {
   const { dictionary: t, locale } = useLocale();
   const dictionary = t.posts;
   const postLabels: PostLabels = {
@@ -236,7 +236,6 @@ export default function PostsView({ posts }: { posts: FacebookPost[] }) {
     imageOnly: dictionary.imageOnly,
     openOnFacebook: dictionary.openOnFacebook,
   };
-  const informationPosts = posts.filter(isInformationPost);
 
   return (
     <div className="public-page posts-page">
