@@ -1,4 +1,8 @@
-import { getSelectedFacebookPostForRequest } from "@/lib/facebook-posts";
+import { getPublishedFacebookPostPicture } from "@/lib/facebook";
+import {
+  getSelectedFacebookPostForRequest,
+  refreshSelectedFacebookPostPicture,
+} from "@/lib/facebook-posts";
 import { isFacebookImageUrl } from "@/lib/facebook-post-types";
 
 export const runtime = "nodejs";
@@ -37,6 +41,34 @@ async function fetchTrustedImage(source: string): Promise<Response | undefined> 
     }
   }
   return undefined;
+}
+
+function isExpiredFacebookImageUrl(value: string | undefined): boolean {
+  if (!value) return false;
+  try {
+    const expiration = new URL(value).searchParams.get("oe");
+    if (!expiration || !/^[\da-f]+$/i.test(expiration)) return false;
+    const expiresAt = Number.parseInt(expiration, 16);
+    return Number.isSafeInteger(expiresAt) && expiresAt * 1000 <= Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function isUsableImageResponse(
+  response: Response | undefined,
+  source: string | undefined,
+): response is Response {
+  const contentType = response?.headers.get("content-type")?.split(";", 1)[0] || "";
+  return Boolean(
+    response?.ok &&
+      isFacebookImageUrl(response.url || source) &&
+      IMAGE_CONTENT_TYPE.test(contentType),
+  );
+}
+
+async function discardImageResponse(response: Response | undefined): Promise<void> {
+  if (response?.body) await response.body.cancel().catch(() => undefined);
 }
 
 async function readImage(response: Response): Promise<Uint8Array | undefined> {
@@ -88,21 +120,48 @@ export async function GET(
   } catch {
     return unavailableImage();
   }
-  if (!post?.fullPicture || !isFacebookImageUrl(post.fullPicture)) {
-    return unavailableImage();
+  if (!post) return unavailableImage();
+
+  let pictureUrl = post.fullPicture;
+  let response = pictureUrl && isFacebookImageUrl(pictureUrl) && !isExpiredFacebookImageUrl(pictureUrl)
+    ? await fetchTrustedImage(pictureUrl)
+    : undefined;
+
+  if (!isUsableImageResponse(response, pictureUrl)) {
+    await discardImageResponse(response);
+
+    let freshPicture: string | undefined;
+    try {
+      freshPicture = await getPublishedFacebookPostPicture(id);
+    } catch {
+      return unavailableImage();
+    }
+    if (!freshPicture) return unavailableImage();
+
+    let selectedPost;
+    try {
+      selectedPost = await refreshSelectedFacebookPostPicture(
+        id,
+        pictureUrl,
+        freshPicture,
+      );
+    } catch {
+      return unavailableImage();
+    }
+    pictureUrl = selectedPost?.fullPicture;
+    if (!pictureUrl || !isFacebookImageUrl(pictureUrl)) {
+      return unavailableImage();
+    }
+
+    response = await fetchTrustedImage(pictureUrl);
   }
 
-  const response = await fetchTrustedImage(post.fullPicture);
-  if (!response) return unavailableImage();
+  if (!isUsableImageResponse(response, pictureUrl)) {
+    await discardImageResponse(response);
+    return unavailableImage();
+  }
 
   const contentType = response.headers.get("content-type")?.split(";", 1)[0] || "";
-  if (
-    !response.ok ||
-    !isFacebookImageUrl(response.url || post.fullPicture) ||
-    !IMAGE_CONTENT_TYPE.test(contentType)
-  ) {
-    return unavailableImage();
-  }
 
   try {
     const image = await readImage(response);

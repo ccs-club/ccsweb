@@ -47,6 +47,42 @@ test("Facebook post selections validate, serialize, and retain concurrent writes
       assert.equal(await store.getSelectedFacebookPostForRequest("not-a-post"), undefined);
     });
 
+    await t.test("refreshes image URLs only for selected posts", async () => {
+      const target = {
+        ...post,
+        id: "110700467422954_12345678901234568",
+        fullPicture: "https://scontent.fbcdn.net/expired.jpg",
+      };
+      const freshPicture = "https://scontent.fbcdn.net/fresh.jpg";
+      await store.saveSelectedFacebookPost(target);
+
+      const refreshed = await store.refreshSelectedFacebookPostPicture(
+        target.id,
+        target.fullPicture,
+        freshPicture,
+      );
+      assert.equal(refreshed?.fullPicture, freshPicture);
+      assert.equal(refreshed?.message, target.message);
+
+      const current = await store.refreshSelectedFacebookPostPicture(
+        target.id,
+        target.fullPicture,
+        "https://scontent.fbcdn.net/older-refresh.jpg",
+      );
+      assert.equal(current?.fullPicture, freshPicture);
+
+      await store.removeSelectedFacebookPost(target.id);
+      assert.equal(
+        await store.refreshSelectedFacebookPostPicture(
+          target.id,
+          freshPicture,
+          "https://scontent.fbcdn.net/after-removal.jpg",
+        ),
+        undefined,
+      );
+      assert.equal(await store.getSelectedFacebookPostForRequest(target.id), undefined);
+    });
+
     await t.test("serializes concurrent selections and sorts newest first", async () => {
       const additions = Array.from({ length: 12 }, (_, index) => ({
         ...post,

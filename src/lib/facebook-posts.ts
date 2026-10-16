@@ -2,6 +2,7 @@ import path from "node:path";
 import { connection } from "next/server";
 import { createDocumentStore } from "./document-store";
 import {
+  isFacebookImageUrl,
   isFacebookPostId,
   normalizeFacebookPost,
   type FacebookPost,
@@ -104,6 +105,31 @@ export function saveSelectedFacebookPost(value: unknown): Promise<FacebookPost> 
     if (existingIndex === -1) posts.push(post);
     else posts[existingIndex] = post;
     return { posts, result: post };
+  });
+}
+
+export function refreshSelectedFacebookPostPicture(
+  id: string,
+  expectedPicture: string | undefined,
+  fullPicture: string,
+): Promise<FacebookPost | undefined> {
+  if (!isFacebookPostId(id) || !isFacebookImageUrl(fullPicture)) {
+    fail("Facebook post image is invalid");
+  }
+
+  return mutateFacebookPosts((current) => {
+    const index = current.findIndex((post) => post.id === id);
+    if (index === -1) return { posts: current, result: undefined };
+    if (current[index].fullPicture !== expectedPicture) {
+      return { posts: current, result: current[index] };
+    }
+
+    const refreshed = normalizeFacebookPost({ ...current[index], fullPicture });
+    if (!refreshed) fail("Facebook post image is invalid");
+
+    const posts = [...current];
+    posts[index] = refreshed;
+    return { posts, result: refreshed };
   });
 }
 

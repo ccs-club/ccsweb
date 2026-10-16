@@ -87,7 +87,7 @@ out.postsInfo.withRealSelection = await page.evaluate(() => ({
   infoSections: document.querySelectorAll(".posts-info-section").length,
   intro: document.querySelector(".posts-hero p")?.textContent?.trim(),
 }));
-/* The real selection carries no #ccs-info post, so the section is absent.
+/* The real selection carries no #ccsinfo post, so the section is absent.
    Add one marked post to see the section render, then restore the store. */
 {
   const store = path.join(process.env.CCS_TEST_DIRECTORY, "facebook-posts.json");
@@ -96,7 +96,7 @@ out.postsInfo.withRealSelection = await page.evaluate(() => ({
   const posts = JSON.parse(saved);
   posts.push({
     id: "110700467422954_1496391259190099",
-    message: "Audit probe #ccs-info marker test",
+    message: "Audit probe #ccsinfo marker test",
     createdTime: "2026-10-04T01:00:00+0000",
     permalinkUrl: "https://www.facebook.com/ccs.cybersec.club/posts/1496391259190099",
   });
