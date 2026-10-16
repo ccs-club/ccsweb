@@ -98,7 +98,7 @@ test("the gallery page is unavailable and About keeps the photo without a dead l
   expect(await sitemap.text()).not.toContain("/gallery");
 });
 
-test("only admin-curated Facebook snapshots appear on the posts page", async ({ page }) => {
+test("selected snapshots remain when the Facebook Page feed is unavailable", async ({ page }) => {
   await page.goto("/");
   const unauthenticated = await page.evaluate(async () => {
     const response = await fetch("/api/admin/facebook-posts");

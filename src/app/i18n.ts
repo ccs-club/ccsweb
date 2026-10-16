@@ -346,7 +346,7 @@ export const dictionaries = {
       facebookIntro:
         "Refresh recent posts from the CCS Facebook Page, then choose which ones appear on /posts. The Page access token stays on the server.",
       facebookInfoHint:
-        "A selected post containing #ccsinfo also appears in the Information section on /posts.",
+        "Recent Page posts containing #ccsinfo appear in the Information section on /posts, even when not selected for the carousel.",
       facebookRefresh: "Refresh published posts",
       facebookRefreshing: "Refreshing posts…",
       facebookNotConfigured: "Facebook Page access is not configured",
@@ -727,7 +727,7 @@ export const dictionaries = {
       facebookIntro:
         "CCS-ийн Facebook хуудасны сүүлийн нийтлэлүүдийг шинэчилж, /posts хуудсанд харагдахыг нь сонгоно уу. Хандалтын токен серверээс гадагшлахгүй.",
       facebookInfoHint:
-        "#ccsinfo шошготой сонгосон нийтлэл /posts хуудасны Мэдээлэл хэсэгт мөн гарна.",
+        "#ccsinfo шошготой сүүлийн үеийн Facebook нийтлэлүүд сонгогдоогүй байсан ч /posts хуудасны Мэдээлэл хэсэгт автоматаар гарна.",
       facebookRefresh: "Нийтлэл шинэчлэх",
       facebookRefreshing: "Нийтлэл шинэчилж байна…",
       facebookNotConfigured: "Facebook хуудасны хандалт тохируулаагүй байна",

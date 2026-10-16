@@ -114,14 +114,13 @@ mounted somewhere other than `data/events.json`. See [Storage](#storage).
 
 ## Publishing selected Facebook posts
 
-`/posts` contains only Page-post snapshots chosen in `/admin`; it never turns
-Facebook's full feed into a public site feed. A signed-in administrator first
-uses **Refresh published posts**, then selects the posts that belong on the
-site. Removing a selection removes it from the public page. The public page
-reads `data/facebook-posts.json` at request time. All selected posts appear in
-the horizontal post browser. A selected post containing `#ccsinfo` also
-appears in the Information section below; the marker remains part of the
-original Facebook text.
+`/posts` shows Page-post snapshots chosen in `/admin` in the selected-post
+carousel. It also shows recent Page posts containing `#ccsinfo` in the
+Information section, whether or not an administrator selected them for the
+carousel. The automatic check scans the Page's 25 most recent posts. Keep older
+tagged posts selected if they must remain in Information. The marker stays in
+the original Facebook text. The Page connection is configured as a server-side
+secret below.
 
 Configure the Page connection as deployment secrets, never browser variables:
 
