@@ -261,6 +261,9 @@ body {
 
 .locale-toggle button.is-active {
   color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-color: var(--green);
 }
 
 .button svg,
@@ -412,16 +415,23 @@ body {
 .hero-facts li {
   min-width: 0;
   color: var(--fg-2);
-  font-size: 15px;
+  font-size: 14.5px;
   letter-spacing: 0.03em;
   line-height: 1.55;
   text-align: center;
+}
+
+.hero-facts li + li::before {
+  content: "·";
+  margin-right: 24px;
+  color: var(--fg-4);
 }
 
 .hero-facts strong {
   font-size: 20px;
   font-weight: 400;
   letter-spacing: 0.01em;
+  color: var(--fg);
 }
 
 .button {
@@ -1376,6 +1386,11 @@ a.program-card:hover {
     flex-wrap: nowrap;
   }
 
+  /* The middot separator only makes sense between siblings in a row. */
+  .hero-facts li + li::before {
+    content: none;
+  }
+
   .hero-facts li {
     max-width: 100%;
     font-size: 15px;
@@ -1530,7 +1545,7 @@ a.program-card:hover {
   --surface: #161616;
   --surface-2: #202020;
   --surface-3: #262626;
-  --fg-4: #949494;
+  --fg-4: #a8a8a8;
   --line-strong: #707070;
   isolation: isolate;
   background: var(--bg);
@@ -1611,8 +1626,8 @@ a.program-card:hover {
 /* The events hero is the same shape as the about page's, so it reuses the
    shared `.page-hero` metrics instead of repeating the values. */
 .events-hero {
-  padding-top: 112px;
-  padding-bottom: 82px;
+  padding-top: 88px;
+  padding-bottom: 72px;
 }
 
 .events-hero h1 {
@@ -2158,8 +2173,8 @@ a.program-card:hover {
 }
 
 .posts-hero {
-  padding-top: 112px;
-  padding-bottom: 82px;
+  padding-top: 88px;
+  padding-bottom: 72px;
 }
 
 .posts-hero h1 {
@@ -2301,8 +2316,8 @@ a.program-card:hover {
 
 .facebook-post-open {
   margin-top: auto;
-  padding-top: 8px;
-  font-size: 12.5px;
+  padding-top: 12px;
+  font-size: 13.5px;
 }
 
 .facebook-post-open:hover,
@@ -3310,9 +3325,24 @@ button:disabled {
 }
 
 .about-opening-photo .about-gallery-status {
-  margin: 12px 0 0;
+  display: inline-flex;
+  min-height: 44px;
+  margin: 4px 0 0;
+  align-items: center;
+  gap: 8px;
   color: var(--fg-3);
   font-size: 14px;
+  text-decoration: none;
+}
+
+.about-opening-photo .about-gallery-status:hover {
+  color: var(--green);
+}
+
+.about-opening-photo .about-gallery-status::after {
+  content: "↗";
+  font-size: 13px;
+  line-height: 1;
 }
 
 .about-opening .about-opening-story {
@@ -3332,7 +3362,7 @@ button:disabled {
 
 .events-opening {
   display: grid;
-  padding: 112px 32px 82px;
+  padding: 88px 32px 72px;
   grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
   grid-template-areas:
     "label stats"
@@ -3370,8 +3400,8 @@ button:disabled {
   min-height: 76px;
   padding: 16px 4px;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 20px;
   border-right: 0;
   border-bottom: 1px solid var(--line);
 }
@@ -3390,14 +3420,15 @@ button:disabled {
 }
 
 .events-opening .events-stats span {
-  max-width: 58%;
-  text-align: right;
+  max-width: none;
+  text-align: left;
+  align-self: center;
 }
 
 .posts-opening {
   display: grid;
-  padding-top: 112px;
-  padding-bottom: 112px;
+  padding-top: 88px;
+  padding-bottom: 96px;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(38px, 4vw, 56px);
   align-items: start;

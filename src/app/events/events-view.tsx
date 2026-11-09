@@ -289,7 +289,11 @@ function EventArchive({ events, dictionary, locale }: {
               <div className="event-card-body">
                 <div className="event-card-topline">
                   <span className="event-type">{dictionary.types[event.type]}</span>
-                  <span className={statusClass(event.status)}>{dictionary.status[event.status]}</span>
+                  {/* Every card in the archive is ended, so the badge repeats what
+                      the section already says. Only non-ended statuses surface. */}
+                  {event.status !== "ended" ? (
+                    <span className={statusClass(event.status)}>{dictionary.status[event.status]}</span>
+                  ) : null}
                 </div>
                 <h3>{eventTitle(event, locale)}</h3>
                 <div className="event-date">
@@ -469,7 +473,7 @@ export default function EventsView({ events }: { events: Event[] }) {
                 aria-pressed={selectedYear === "all"}
               >
                 {dictionary.allYears}
-                <span className="year-count">{pastEvents.length}</span>
+                <span className="year-count">({pastEvents.length})</span>
                 <span className="sr-only">
                   {dictionary.eventsCountSuffix}
                 </span>
@@ -485,7 +489,7 @@ export default function EventsView({ events }: { events: Event[] }) {
                     aria-pressed={selectedYear === year}
                   >
                     {year}
-                    <span className="year-count">{count}</span>
+                    <span className="year-count">({count})</span>
                     <span className="sr-only">
                       {dictionary.eventsCountSuffix}
                     </span>

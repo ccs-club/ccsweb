@@ -37,7 +37,14 @@ export default function AboutView() {
             height={aboutPhoto.height}
             sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 900px) calc(100vw - 64px), 836px"
           />
-          <p className="about-gallery-status">{t.gallery.comingSoon}</p>
+          <a
+            className="about-gallery-status"
+            href="https://www.facebook.com/ccs.cybersec.club"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t.gallery.comingSoon}
+          </a>
         </div>
 
         <section className="about-section about-copy about-opening-story" id="about">
