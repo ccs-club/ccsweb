@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import LocaleToggle from "./locale-toggle";
 import { localizedHref, useLocale } from "./locale-provider";
 import { useUnsavedChanges } from "./unsaved-changes";
@@ -16,11 +17,59 @@ export default function SiteHeader() {
   const { dictionary: t, locale } = useLocale();
   const { hasUnsavedChanges } = useUnsavedChanges();
   const pathname = usePathname();
+  const mobileNavRef = useRef<HTMLDetailsElement>(null);
+
+  const navItems = [
+    { href: "/", label: t.nav.home },
+    { href: "/about", label: t.nav.about },
+    { href: "/events", label: t.nav.events },
+    { href: "/posts", label: t.nav.posts },
+  ];
+
+  useEffect(() => {
+    const closeMenu = () => {
+      if (mobileNavRef.current?.open) mobileNavRef.current.open = false;
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const menu = mobileNavRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMenu();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   function onNavigate(event: { preventDefault: () => void }) {
     if (hasUnsavedChanges && !window.confirm(t.admin.discardUnsaved)) {
       event.preventDefault();
+      return;
     }
+    if (mobileNavRef.current?.open) mobileNavRef.current.open = false;
+  }
+
+  function renderNavLinks() {
+    return navItems.map(({ href, label }) => {
+      const active = isCurrentPath(pathname, href);
+      return (
+        <Link
+          key={href}
+          href={localizedHref(href, locale)}
+          onNavigate={onNavigate}
+          className={active ? "is-active" : undefined}
+          aria-current={active ? "page" : undefined}
+        >
+          {label}
+        </Link>
+      );
+    });
   }
 
   return (
@@ -45,45 +94,14 @@ export default function SiteHeader() {
       </Link>
 
       <nav className="main-nav" aria-label={t.nav.menu}>
-        <Link
-          href={localizedHref("/", locale)}
-          onNavigate={onNavigate}
-          className={pathname === "/" ? "is-active" : undefined}
-          aria-current={pathname === "/" ? "page" : undefined}
-        >
-          {t.nav.home}
-        </Link>
-        <Link
-          href={localizedHref("/about", locale)}
-          onNavigate={onNavigate}
-          className={pathname === "/about" ? "is-active" : undefined}
-          aria-current={pathname === "/about" ? "page" : undefined}
-        >
-          {t.nav.about}
-        </Link>
-        <Link
-          href={localizedHref("/events", locale)}
-          onNavigate={onNavigate}
-          className={isCurrentPath(pathname, "/events") ? "is-active" : undefined}
-          aria-current={isCurrentPath(pathname, "/events") ? "page" : undefined}
-        >
-          {t.nav.events}
-        </Link>
-        <Link
-          href={localizedHref("/posts", locale)}
-          onNavigate={onNavigate}
-          className={pathname === "/posts" ? "is-active" : undefined}
-          aria-current={pathname === "/posts" ? "page" : undefined}
-        >
-          {t.nav.posts}
-        </Link>
+        {renderNavLinks()}
       </nav>
 
       <div className="nav-actions">
         <LocaleToggle />
       </div>
 
-      <details className="mobile-nav">
+      <details className="mobile-nav" ref={mobileNavRef}>
         <summary>
           <span className="mobile-menu-label">{t.nav.menu}</span>
           <span className="mobile-menu-icon" aria-hidden="true">
@@ -93,10 +111,7 @@ export default function SiteHeader() {
           </span>
         </summary>
         <nav className="mobile-nav-panel" aria-label={t.nav.menu}>
-          <Link href={localizedHref("/", locale)} onNavigate={onNavigate}>{t.nav.home}</Link>
-          <Link href={localizedHref("/about", locale)} onNavigate={onNavigate}>{t.nav.about}</Link>
-          <Link href={localizedHref("/events", locale)} onNavigate={onNavigate}>{t.nav.events}</Link>
-          <Link href={localizedHref("/posts", locale)} onNavigate={onNavigate}>{t.nav.posts}</Link>
+          {renderNavLinks()}
         </nav>
       </details>
     </header>

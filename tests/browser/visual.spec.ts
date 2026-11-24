@@ -170,7 +170,7 @@ test("the events hero states the exact archive count", async ({ page }) => {
     await expect(page.locator(".event-preview-track")).toBeVisible();
     const counts = {
       hero: (await page.locator(".events-stats strong").first().textContent())?.trim(),
-      filter: (await page.locator(".year-grid button .year-count").first().textContent())?.trim(),
+      filter: (await page.locator(".year-grid button .year-count").first().textContent())?.trim().replace(/[()]/g, ""),
       cards: await page.locator(".event-preview").count(),
     };
     expect(counts.hero, locale).toBe(String(counts.cards));
@@ -288,7 +288,7 @@ test("hero facts remain readable over the animated shield", async ({ page }, tes
       "color",
       await page.locator(".hero-description").evaluate((element) => getComputedStyle(element).color),
     );
-    await page.addStyleTag({ content: ".hero-facts li, .hero-facts strong { color: transparent !important; }" });
+    await page.addStyleTag({ content: ".hero-facts li, .hero-facts li::before, .hero-facts strong { color: transparent !important; }" });
     await expect(page.locator(".hero-facts li").first()).toHaveCSS("color", "rgba(0, 0, 0, 0)");
     const screenshot = await page.screenshot();
     const settledLabels = await page.locator(".hero-facts li").evaluateAll((elements) => elements.map((element) => {
@@ -403,7 +403,7 @@ test("About keeps its photo and one-column content within the page budget", asyn
     await expect(page.locator(".about-opening-photo img")).toHaveAttribute("alt", dictionaries[locale].gallery.items["mnsec-2026"].alt);
     await expect(page.locator(".about-opening-photo .gallery-tile-caption")).toHaveCount(0);
     await expect(page.locator(".about-opening-photo .about-gallery-status")).toHaveText(dictionaries[locale].gallery.comingSoon);
-    await expect(page.locator(".about-opening-photo a")).toHaveCount(0);
+    await expect(page.locator('.about-opening-photo a[href^="/gallery"]')).toHaveCount(0);
     await expect(page.locator(".program-card")).toHaveCount(3);
     const dimensions = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight }));
     expect(dimensions.width).toBe(1366);
@@ -508,17 +508,17 @@ test("public pages use charcoal layers without dotted shield marks", async ({ pa
         await expect(page.locator(".event-preview-open").first()).toHaveCSS("font-size", "13.5px");
       } else {
         await expect(page.locator(".posts-hero > p")).toHaveCSS("font-size", "17px");
-        await expect(page.locator(".facebook-post-message").first()).toHaveCSS("font-size", "13px");
+        await expect(page.locator(".facebook-post-message").first()).toHaveCSS("font-size", "14.5px");
       }
       await expect(root).toHaveCSS("--surface-2", "#202020");
-      await expect(root).toHaveCSS("--fg-4", "#949494");
+      await expect(root).toHaveCSS("--fg-4", "#a8a8a8");
       const header = page.locator(".page-hero, .events-hero, .posts-hero");
       const motifMask = await header.evaluate((element) => getComputedStyle(element, "::after").maskImage);
       expect(motifMask).toBe("none");
       const screenshot = await page.screenshot({ fullPage: true });
       expect((await sharp(screenshot).metadata()).width).toBe(page.viewportSize()!.width);
       for (const background of [[16, 16, 16], [22, 22, 22], [32, 32, 32], [38, 38, 38]]) {
-        expect(contrast([148, 148, 148], background)).toBeGreaterThanOrEqual(4.5);
+        expect(contrast([168, 168, 168], background)).toBeGreaterThanOrEqual(4.5);
         expect(contrast([112, 112, 112], background)).toBeGreaterThanOrEqual(3);
       }
       if (route === "events") {

@@ -73,11 +73,12 @@ function FacebookPostCard({
   openOnFacebook: string;
 }) {
   const date = formatPostDate(post.createdTime, locale);
+  const preview = post.message.replace(/\n{2,}/g, "\n");
 
   return (
     <article className="admin-facebook-post">
       <time className="admin-facebook-date" dateTime={post.createdTime}>{date}</time>
-      <p className="admin-facebook-message">{post.message || imageOnly}</p>
+      <p className="admin-facebook-message">{preview || imageOnly}</p>
       <div className="admin-facebook-post-actions">
         <a href={post.permalinkUrl} target="_blank" rel="noreferrer">
           {openOnFacebook} <ArrowIcon />

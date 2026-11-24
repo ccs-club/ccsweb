@@ -50,7 +50,7 @@ body {
   flex-direction: column;
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   /* Keep oversized hero artwork from creating a horizontal scrollbar. */
   overflow-x: hidden;
@@ -185,15 +185,16 @@ body {
 }
 
 .brand-copy strong {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .brand-copy small {
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   color: var(--fg-4);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 
 .main-nav {
@@ -224,6 +225,14 @@ body {
   color: var(--fg);
 }
 
+.main-nav a.is-active,
+.main-nav a[aria-current="page"] {
+  text-decoration: underline;
+  text-underline-offset: 8px;
+  text-decoration-color: var(--green);
+  text-decoration-thickness: 1.5px;
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
@@ -237,6 +246,7 @@ body {
   align-items: center;
   gap: 4px;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
 }
 
@@ -334,21 +344,21 @@ body {
 .hero-content::before {
   content: "";
   position: absolute;
-  inset: -24px -20px;
+  inset: -88px -88px;
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(
     to right,
     transparent,
-    rgba(10, 10, 10, 0.55) 20px,
-    rgba(10, 10, 10, 0.55) calc(100% - 20px),
+    rgba(10, 10, 10, 0.58) 88px,
+    rgba(10, 10, 10, 0.58) calc(100% - 88px),
     transparent
   );
   mask-image: linear-gradient(
     to bottom,
     transparent,
-    #000 24px,
-    #000 calc(100% - 24px),
+    #000 88px,
+    #000 calc(100% - 88px),
     transparent
   );
 }
@@ -359,6 +369,7 @@ body {
   gap: 10px;
   margin: 0;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 13px;
   letter-spacing: 0.06em;
 }
@@ -366,9 +377,9 @@ body {
 .hero h1 {
   margin: 26px 0 0;
   font-size: clamp(34px, 7.2vw, 76px);
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
 }
 
 .hero h1 span {
@@ -428,9 +439,10 @@ body {
 }
 
 .hero-facts strong {
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
   color: var(--fg);
 }
 
@@ -486,10 +498,10 @@ body {
 .page-hero h1 {
   max-width: 820px;
   margin: 30px 0 0;
-  font-size: clamp(34px, 6vw, 68px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-size: clamp(34px, 6vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
 }
 
 .page-hero > p {
@@ -547,10 +559,10 @@ main {
 .programs-heading h2,
 .join-inner h2 {
   margin: 0;
-  font-size: clamp(28px, 4.4vw, 50px);
-  font-weight: 400;
+  font-size: clamp(28px, 4.4vw, 48px);
+  font-weight: 500;
   line-height: 1.12;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .about-copy h2 span {
@@ -606,17 +618,18 @@ main {
 
 .stat strong {
   display: block;
-  font-size: clamp(28px, 3.6vw, 42px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: clamp(28px, 3.6vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
 }
 
 .stat span {
   display: block;
   margin-top: 8px;
   color: var(--fg-4);
-  font-size: 13px;
-  letter-spacing: 0.08em;
+  font-size: 14px;
+  letter-spacing: 0.01em;
 }
 
 /* Gallery */
@@ -1003,24 +1016,26 @@ a.program-card:hover {
 }
 
 .program-number {
-  color: var(--fg-4);
-  font-size: 12.5px;
   padding-top: 3px;
+  color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
 }
 
 .program-type {
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .program-copy h3 {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   font-size: 27px;
-  line-height: 1.15;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  line-height: 1.18;
+  font-weight: 500;
+  letter-spacing: -0.015em;
 }
 
 .program-copy p {
@@ -1125,9 +1140,10 @@ a.program-card:hover {
   max-width: 340px;
   margin: 20px 0 0;
   color: var(--fg-4);
-  font-size: 13.5px;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
   line-height: 1.8;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
 .footer-group {
@@ -1139,6 +1155,7 @@ a.program-card:hover {
 .footer-heading {
   margin: 0;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -1633,10 +1650,10 @@ a.program-card:hover {
 .events-hero h1 {
   max-width: 820px;
   margin: 30px 0 0;
-  font-size: clamp(34px, 6vw, 68px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-size: clamp(34px, 6vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
 }
 
 .events-hero > p {
@@ -1672,8 +1689,9 @@ a.program-card:hover {
 
 .events-stats strong {
   display: block;
-  font-size: clamp(26px, 3.2vw, 40px);
-  font-weight: 400;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: clamp(26px, 3.2vw, 38px);
+  font-weight: 500;
   letter-spacing: -0.04em;
 }
 
@@ -1681,8 +1699,8 @@ a.program-card:hover {
   display: block;
   margin-top: 9px;
   color: var(--fg-4);
-  font-size: 12.5px;
-  letter-spacing: 0.04em;
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
 }
 
 .events-section,
@@ -1699,10 +1717,10 @@ a.program-card:hover {
 }
 
 .events-section-heading h2 {
-  margin: 22px 0 0;
+  margin: 18px 0 0;
   font-size: clamp(27px, 4vw, 44px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 .event-card-grid {
@@ -1738,9 +1756,30 @@ a.program-card:hover {
   background: var(--surface-2);
 }
 
+.event-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 10, 0.14),
+    transparent 24%,
+    transparent 76%,
+    rgba(10, 10, 10, 0.2)
+  );
+}
+
 .event-cover img {
   object-fit: cover;
-  transition: transform 400ms ease;
+  filter: brightness(0.92) contrast(1.03);
+  transition: transform 400ms ease, filter 220ms ease;
+}
+
+.event-card:hover .event-cover img {
+  transform: scale(1.025);
+  filter: brightness(0.98) contrast(1.03);
 }
 
 /* Placeholder for events with no photo on record. Uses the same dot field
@@ -1763,13 +1802,10 @@ a.program-card:hover {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-}
-
-.event-card:hover .event-cover img {
-  transform: scale(1.025);
 }
 
 .event-card-body {
@@ -1789,6 +1825,7 @@ a.program-card:hover {
 
 .event-type {
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1802,6 +1839,7 @@ a.program-card:hover {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--fg-3);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -1816,17 +1854,18 @@ a.program-card:hover {
 .event-card h3 {
   margin: 15px 0 0;
   font-size: clamp(20px, 2.2vw, 28px);
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.18;
 }
 
 .event-date {
   display: block;
   margin-top: 10px;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .event-summary {
@@ -1851,6 +1890,7 @@ a.program-card:hover {
 
 .event-details dt {
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1859,7 +1899,7 @@ a.program-card:hover {
 .event-details dd {
   margin: 5px 0 0;
   color: var(--fg-2);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -1877,6 +1917,7 @@ a.program-card:hover {
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--fg-3);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
 }
 
@@ -1951,8 +1992,9 @@ a.program-card:hover {
   border: 0;
   background: transparent;
   color: var(--fg-4);
-  font: inherit;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 13px;
+  white-space: nowrap;
   cursor: pointer;
   transition: color 150ms ease;
 }
@@ -2068,6 +2110,7 @@ a.program-card:hover {
 .event-archive-position {
   margin: 0;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
 }
 
@@ -2115,7 +2158,7 @@ a.program-card:hover {
   overflow-y: auto;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--fg);
 }
 
@@ -2129,13 +2172,34 @@ a.program-card:hover {
   top: 0;
   display: flex;
   justify-content: flex-end;
-  padding: 8px;
-  background: var(--surface-2);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-2);
+  background: var(--surface);
 }
 
 .event-details-dialog .event-card {
   border: 0;
   border-radius: 0;
+}
+
+.event-details-dialog .event-cover {
+  aspect-ratio: 16 / 10;
+  padding: 12px 20px;
+  background: #0d0d0d;
+}
+
+.event-details-dialog .event-cover::after {
+  display: none;
+}
+
+.event-details-dialog .event-cover img {
+  object-fit: contain;
+  filter: none;
+}
+
+.event-details-dialog .event-card:hover .event-cover img {
+  transform: none;
+  filter: none;
 }
 
 .event-details-dialog .event-details {
@@ -2180,10 +2244,10 @@ a.program-card:hover {
 .posts-hero h1 {
   max-width: 820px;
   margin: 30px 0 0;
-  font-size: clamp(34px, 6vw, 68px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.04;
+  font-size: clamp(34px, 6vw, 64px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.06;
 }
 
 .posts-hero > p {
@@ -2200,26 +2264,26 @@ a.program-card:hover {
 }
 
 .posts-info-section {
-  padding-top: 86px;
-  padding-bottom: 112px;
+  padding-top: clamp(38px, 4vw, 56px);
+  padding-bottom: 96px;
 }
 
 .posts-section-heading h2 {
-  margin: 22px 0 0;
-  font-size: clamp(27px, 4vw, 44px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  margin: 16px 0 0;
+  font-size: clamp(27px, 3.2vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 .facebook-post-carousel {
-  margin-top: 42px;
+  margin-top: 26px;
 }
 
 .facebook-post-track {
   display: flex;
   margin: 0;
   padding: 6px 6px 18px;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 16px;
   list-style: none;
   overflow-x: auto;
@@ -2239,17 +2303,21 @@ a.program-card:hover {
 .facebook-post-item {
   display: flex;
   min-width: 0;
-  flex: 0 0 min(520px, calc(100% - 28px));
-  container-type: inline-size;
+  flex: 0 0 calc(100% - 28px);
   scroll-snap-align: start;
+}
+
+@media (min-width: 760px) {
+  .facebook-post-item {
+    flex-basis: calc((100% - 16px) / 2);
+  }
 }
 
 .facebook-post-card {
   display: flex;
   width: 100%;
   min-width: 0;
-  height: 500px;
-  height: clamp(380px, calc(56.25cqw + 205px), 500px);
+  height: 100%;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--line-strong);
@@ -2273,7 +2341,7 @@ a.program-card:hover {
   display: flex;
   min-width: 0;
   min-height: 0;
-  padding: 18px 20px 20px;
+  padding: 20px 22px 20px;
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
@@ -2282,23 +2350,57 @@ a.program-card:hover {
 .facebook-post-date,
 .admin-facebook-date {
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .facebook-post-message {
   display: -webkit-box;
-  max-height: 6.4em;
-  margin: 10px 0 0;
+  max-height: 8.25em;
+  margin: 12px 0 0;
   overflow: hidden;
   color: var(--fg-2);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 14.5px;
+  line-height: 1.65;
   white-space: pre-line;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+
+.facebook-post-actions {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+}
+
+.facebook-post-read {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.facebook-post-read:hover {
+  color: var(--fg);
+  text-decoration-color: var(--green);
 }
 
 .facebook-post-open,
@@ -2310,14 +2412,38 @@ a.program-card:hover {
   align-items: center;
   gap: 8px;
   color: var(--green);
-  font-size: 13.5px;
+  font-size: 13px;
+  white-space: nowrap;
   text-decoration: none;
 }
 
 .facebook-post-open {
-  margin-top: auto;
-  padding-top: 12px;
-  font-size: 13.5px;
+  margin-top: 0;
+  margin-left: auto;
+  padding-top: 0;
+  font-size: 13px;
+}
+
+.post-dialog-body {
+  background: var(--surface);
+}
+
+.post-dialog-copy {
+  padding: 24px 26px 26px;
+}
+
+.post-dialog-message {
+  margin: 14px 0 0;
+  color: var(--fg-2);
+  font-size: 15px;
+  line-height: 1.72;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.post-dialog-copy .facebook-post-open {
+  margin-top: 18px;
+  margin-left: 0;
 }
 
 .facebook-post-open:hover,
@@ -2348,6 +2474,7 @@ a.program-card:hover {
 .facebook-post-carousel-position {
   margin: 0;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
 }
 
@@ -2408,9 +2535,9 @@ a.program-card:hover {
 .admin-login-card h1,
 .admin-dashboard-header h1 {
   margin: 25px 0 0;
-  font-size: clamp(28px, 4vw, 46px);
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
 }
 
 .admin-login-card > p,
@@ -2465,11 +2592,13 @@ a.program-card:hover {
 .admin-toolbar h2 {
   margin: 12px 0 0;
   font-size: 25px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .form-kicker {
   color: var(--green);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.16em;
 }
@@ -2498,6 +2627,7 @@ a.program-card:hover {
   padding: 16px 17px;
   border-bottom: 1px solid var(--line);
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2542,6 +2672,7 @@ a.program-card:hover {
 
 .admin-event-type {
   color: var(--green);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2549,13 +2680,14 @@ a.program-card:hover {
 
 .admin-event-select strong {
   margin-top: 7px;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .admin-event-select small {
   margin-top: 6px;
   color: var(--fg-4);
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12px;
 }
 
@@ -2614,7 +2746,8 @@ a.program-card:hover {
 .admin-form-heading h2 {
   margin: 11px 0 0;
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .text-button {
@@ -2816,7 +2949,8 @@ button:disabled {
 .admin-facebook-header h2 {
   margin: 12px 0 0;
   font-size: 25px;
-  font-weight: 400;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .admin-facebook-header p {
@@ -2887,12 +3021,17 @@ button:disabled {
 }
 
 .admin-facebook-message {
+  display: -webkit-box;
   margin: 9px 0 0;
+  overflow: hidden;
   color: var(--fg-2);
-  font-size: 12px;
+  font-size: 12.5px;
   line-height: 1.65;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
 }
 
 .admin-facebook-post-actions {
@@ -3012,16 +3151,25 @@ button:disabled {
 }
 
 .mobile-nav-panel a {
+  display: flex;
   min-height: 44px;
-  padding: 10px 11px;
+  padding: 10px 12px;
+  align-items: center;
   border-radius: 6px;
   color: var(--fg-2);
-  font-size: 12px;
+  font-size: 13.5px;
   text-decoration: none;
 }
 
 .mobile-nav-panel a:hover {
   color: var(--fg);
+}
+
+.mobile-nav-panel a.is-active,
+.mobile-nav-panel a[aria-current="page"] {
+  background: var(--surface-2);
+  color: var(--fg);
+  box-shadow: inset 2px 0 0 var(--green);
 }
 
 @media (max-width: 360px) {
@@ -3068,6 +3216,12 @@ button:disabled {
 
   .event-card-featured {
     grid-template-columns: 1fr;
+  }
+
+  .events-past-heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 20px;
   }
 
   .event-card-featured .event-cover {
@@ -3187,14 +3341,14 @@ button:disabled {
   }
 
   .year-grid {
-    display: grid;
+    display: flex;
     width: 100%;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 4px 10px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .year-grid button {
-    width: 100%;
+    width: auto;
   }
 
   .event-register {
@@ -3290,7 +3444,7 @@ button:disabled {
   display: grid;
   max-width: 900px;
   padding-top: 64px;
-  padding-bottom: 72px;
+  padding-bottom: 56px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
     "heading"
@@ -3299,6 +3453,12 @@ button:disabled {
     "stats";
   gap: clamp(32px, 4vw, 48px);
   align-items: start;
+}
+
+/* Keep every /about band aligned on the same 900px reading rail. */
+.about-page .programs-section,
+.about-page .join-inner {
+  max-width: 900px;
 }
 
 .about-opening-heading {
@@ -3327,16 +3487,19 @@ button:disabled {
 .about-opening-photo .about-gallery-status {
   display: inline-flex;
   min-height: 44px;
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   align-items: center;
   gap: 8px;
   color: var(--fg-3);
-  font-size: 14px;
+  font-family: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
   text-decoration: none;
 }
 
 .about-opening-photo .about-gallery-status:hover {
   color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .about-opening-photo .about-gallery-status::after {
@@ -3354,10 +3517,43 @@ button:disabled {
   gap: 20px;
 }
 
+/* Vertical list of club facts rendered as a compact baseline ledger matching
+   /events stats rather than giant empty full-width cards. */
 .about-opening .stats-grid {
   grid-area: stats;
   margin-top: 0;
   grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
+.about-opening .stat {
+  display: grid;
+  padding: 18px 4px;
+  grid-template-columns: minmax(92px, 132px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+}
+
+.about-opening .stat:last-child {
+  border-bottom: 0;
+}
+
+.about-opening .stat:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.about-opening .stat span {
+  margin-top: 0;
+  color: var(--fg-3);
+  font-size: 15px;
+  letter-spacing: 0.01em;
 }
 
 .events-opening {
@@ -3428,10 +3624,14 @@ button:disabled {
 .posts-opening {
   display: grid;
   padding-top: 88px;
-  padding-bottom: 96px;
+  padding-bottom: 0;
   grid-template-columns: minmax(0, 1fr);
   gap: clamp(38px, 4vw, 56px);
   align-items: start;
+}
+
+.posts-opening:last-child {
+  padding-bottom: 96px;
 }
 
 .posts-opening .posts-hero {
@@ -3446,15 +3646,6 @@ button:disabled {
   max-width: none;
   min-width: 0;
   padding: 0;
-}
-
-.posts-opening .posts-section-heading h2 {
-  margin-top: 16px;
-  font-size: clamp(27px, 3.2vw, 40px);
-}
-
-.posts-opening .facebook-post-carousel {
-  margin-top: 26px;
 }
 
 @media (max-width: 940px) {
@@ -3479,9 +3670,18 @@ button:disabled {
 
   .posts-opening {
     padding-top: 96px;
-    padding-bottom: 80px;
+    padding-bottom: 0;
     grid-template-columns: minmax(0, 1fr);
     gap: 42px;
+  }
+
+  .posts-opening:last-child {
+    padding-bottom: 80px;
+  }
+
+  .posts-info-section {
+    padding-top: 42px;
+    padding-bottom: 80px;
   }
 }
 
@@ -3498,7 +3698,24 @@ button:disabled {
 
   .posts-opening {
     padding-top: 82px;
-    padding-bottom: 72px;
+    padding-bottom: 0;
     gap: 38px;
+  }
+
+  .posts-opening:last-child {
+    padding-bottom: 72px;
+  }
+
+  .posts-info-section {
+    padding-top: 38px;
+    padding-bottom: 72px;
+  }
+}
+
+@media (max-width: 420px) {
+  .about-opening .stat {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 16px 2px;
   }
 }

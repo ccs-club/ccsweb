@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Golos_Text } from "next/font/google";
 import { LocaleProvider } from "./locale-provider";
 import { dictionaries } from "./i18n";
 import { SITE_URL } from "@/lib/site-config";
 import "./globals.css";
 
+const golosText = Golos_Text({
+  variable: "--font-sans",
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "500", "600"],
+});
+
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
@@ -33,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={geistMono.variable}
+      className={`${golosText.variable} ${geistMono.variable}`}
     >
       <body>
         <div className="background-wash" aria-hidden="true" />

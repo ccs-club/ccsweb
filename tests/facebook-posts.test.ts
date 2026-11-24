@@ -3,7 +3,10 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { getInformationFacebookPosts } from "../src/lib/facebook-post-types";
+import {
+  getInformationFacebookPosts,
+  syncSelectedFacebookPosts,
+} from "../src/lib/facebook-post-types";
 
 const post = {
   id: "110700467422954_12345678901234567",
@@ -49,6 +52,17 @@ test("information posts include recent tagged Page posts outside the selected ca
   assert.deepEqual(
     informationPosts.map((item) => item.id),
     [recentUnselected.id, selectedArchived.id],
+  );
+  assert.deepEqual(
+    syncSelectedFacebookPosts(
+      [selectedTagged, selectedRegular, selectedArchived],
+      [recentUpdated, recentUnselected],
+    ).map((item) => [item.id, item.message]),
+    [
+      [selectedTagged.id, recentUpdated.message],
+      [selectedRegular.id, selectedRegular.message],
+      [selectedArchived.id, selectedArchived.message],
+    ],
   );
 });
 

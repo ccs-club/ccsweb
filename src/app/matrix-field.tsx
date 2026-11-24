@@ -23,8 +23,8 @@ const OFF = "rgba(255, 255, 255, 0.04)";
 const KEEP = 0.58;
 const KEEP_EDGE = 0.9;
 const DOT_TIME_SCALE = 0.1;
-const CIRCUIT_BASE = 0.28;
-const CIRCUIT_PULSE = 0.92;
+const CIRCUIT_BASE = 0.18;
+const CIRCUIT_PULSE = 0.62;
 
 function makeCircuit(image: HTMLImageElement): Circuit | null {
   const width = image.naturalWidth;
@@ -200,7 +200,7 @@ export default function MatrixField({ src = "/ccs-logo.png" }: { src?: string })
           (dot.edge ? 1.2 : 1);
 
         ctx.fillStyle =
-          level < 0.12 ? OFF : `${LIT}${(0.1 + Math.min(1, level) * 0.59).toFixed(3)})`;
+          level < 0.12 ? OFF : `${LIT}${(0.08 + Math.min(1, level) * 0.44).toFixed(3)})`;
         ctx.fillRect(dot.x, dot.y, dot.size, dot.size);
       }
 

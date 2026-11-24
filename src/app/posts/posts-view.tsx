@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ArrowIcon, ChevronLeftIcon, ChevronRightIcon } from "@/app/icons";
+import { ArrowIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "@/app/icons";
 import { useLocale } from "@/app/locale-provider";
 import type { FacebookPost } from "@/lib/facebook-post-types";
 
@@ -31,6 +31,7 @@ type CarouselLabels = {
 type PostLabels = {
   postLabel: string;
   imageOnly: string;
+  readPost: string;
   openOnFacebook: string;
 };
 
@@ -55,6 +56,7 @@ function FacebookPostImage({ id }: { id: string }) {
         alt=""
         fill
         sizes="(max-width: 640px) calc(100vw - 68px), 520px"
+        loading="eager"
         unoptimized
         onError={() => setFailed(true)}
       />
@@ -66,12 +68,16 @@ function FacebookPostCard({
   post,
   locale,
   labels,
+  onOpen,
 }: {
   post: FacebookPost;
   locale: "en" | "mn";
   labels: PostLabels;
+  onOpen: (post: FacebookPost) => void;
 }) {
   const date = formatPostDate(post.createdTime, locale);
+  const preview = post.message.replace(/\n{2,}/g, "\n");
+  const isLong = post.message.length > 140 || post.message.includes("\n");
 
   return (
     <article className="facebook-post-card" aria-label={`${labels.postLabel}: ${date}`}>
@@ -79,16 +85,28 @@ function FacebookPostCard({
       <div className="facebook-post-body">
         <time className="facebook-post-date" dateTime={post.createdTime}>{date}</time>
         <p className="facebook-post-message">
-          {post.message || labels.imageOnly}
+          {preview || labels.imageOnly}
         </p>
-        <a
-          className="facebook-post-open"
-          href={post.permalinkUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {labels.openOnFacebook} <ArrowIcon />
-        </a>
+        <div className="facebook-post-actions">
+          {isLong ? (
+            <button
+              type="button"
+              className="facebook-post-read"
+              aria-haspopup="dialog"
+              onClick={() => onOpen(post)}
+            >
+              {labels.readPost}
+            </button>
+          ) : null}
+          <a
+            className="facebook-post-open"
+            href={post.permalinkUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {labels.openOnFacebook} <ArrowIcon />
+          </a>
+        </div>
       </div>
     </article>
   );
@@ -100,12 +118,14 @@ function FacebookPostCarousel({
   postLabels,
   carouselLabels,
   className,
+  onOpenPost,
 }: {
   posts: FacebookPost[];
   locale: "en" | "mn";
   postLabels: PostLabels;
   carouselLabels: CarouselLabels;
   className: string;
+  onOpenPost: (post: FacebookPost) => void;
 }) {
   const trackRef = useRef<HTMLOListElement>(null);
   const [position, setPosition] = useState({ first: 0, last: 0, atEnd: posts.length <= 1 });
@@ -187,7 +207,12 @@ function FacebookPostCarousel({
       >
         {posts.map((post) => (
           <li className="facebook-post-item" key={post.id}>
-            <FacebookPostCard post={post} locale={locale} labels={postLabels} />
+            <FacebookPostCard
+              post={post}
+              locale={locale}
+              labels={postLabels}
+              onOpen={onOpenPost}
+            />
           </li>
         ))}
       </ol>
@@ -231,9 +256,26 @@ export default function PostsView({
 }) {
   const { dictionary: t, locale } = useLocale();
   const dictionary = t.posts;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [opened, setOpened] = useState<FacebookPost | null>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (opened && !dialog.open) dialog.showModal();
+    if (!opened && dialog.open) dialog.close();
+    if (!opened) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [opened]);
+
   const postLabels: PostLabels = {
     postLabel: dictionary.postLabel,
     imageOnly: dictionary.imageOnly,
+    readPost: dictionary.readPost,
     openOnFacebook: dictionary.openOnFacebook,
   };
 
@@ -264,6 +306,7 @@ export default function PostsView({
               posts={posts}
               locale={locale}
               postLabels={postLabels}
+              onOpenPost={setOpened}
               carouselLabels={{
                 browse: dictionary.browseSelected,
                 previous: dictionary.previousSelected,
@@ -292,6 +335,7 @@ export default function PostsView({
             posts={informationPosts}
             locale={locale}
             postLabels={postLabels}
+            onOpenPost={setOpened}
             carouselLabels={{
               browse: dictionary.browseInfo,
               previous: dictionary.previousInfo,
@@ -301,6 +345,50 @@ export default function PostsView({
           />
         </section>
       ) : null}
+
+      <dialog
+        ref={dialogRef}
+        className="event-details-dialog post-details-dialog"
+        aria-labelledby="post-dialog-date"
+        onClose={() => setOpened(null)}
+        onClick={(event) => {
+          if (event.target === dialogRef.current) setOpened(null);
+        }}
+      >
+        {opened ? (
+          <>
+            <div className="event-dialog-toolbar">
+              <button
+                type="button"
+                autoFocus
+                aria-label={dictionary.closePost}
+                onClick={() => setOpened(null)}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <article className="post-dialog-body">
+              {opened.fullPicture ? <FacebookPostImage id={opened.id} /> : null}
+              <div className="post-dialog-copy">
+                <time id="post-dialog-date" className="facebook-post-date" dateTime={opened.createdTime}>
+                  {formatPostDate(opened.createdTime, locale)}
+                </time>
+                <p className="post-dialog-message">
+                  {opened.message || dictionary.imageOnly}
+                </p>
+                <a
+                  className="facebook-post-open"
+                  href={opened.permalinkUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {dictionary.openOnFacebook} <ArrowIcon />
+                </a>
+              </div>
+            </article>
+          </>
+        ) : null}
+      </dialog>
     </div>
   );
 }

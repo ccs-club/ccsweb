@@ -79,6 +79,30 @@ function eventPrize(event: Event, locale: "en" | "mn"): string | undefined {
   return locale === "mn" ? event.prizeMn || event.prize : event.prize;
 }
 
+function EventDateRange({
+  date,
+  endDate,
+  locale,
+  separator,
+}: {
+  date: string;
+  endDate?: string;
+  locale: "en" | "mn";
+  separator: string;
+}) {
+  return (
+    <div className="event-date">
+      <time dateTime={date}>{formatDate(date, locale)}</time>
+      {endDate ? (
+        <>
+          {locale === "mn" ? " – " : ` ${separator} `}
+          <time dateTime={endDate}>{formatDate(endDate, locale)}</time>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 function statusClass(status: EventStatus): string {
   return `event-status event-status-${status}`;
 }
@@ -154,17 +178,12 @@ function EventCard({
           <span className={statusClass(event.status)}>{statusLabel}</span>
         </div>
         <h3 id={titleId}>{title}</h3>
-        <div className="event-date">
-          <time dateTime={event.date}>{formatDate(event.date, locale)}</time>
-          {event.endDate ? (
-            <>
-              {locale === "mn" ? " – " : ` ${dictionary.rangeSeparator} `}
-              <time dateTime={event.endDate}>
-                {formatDate(event.endDate, locale)}
-              </time>
-            </>
-          ) : null}
-        </div>
+        <EventDateRange
+          date={event.date}
+          endDate={event.endDate}
+          locale={locale}
+          separator={dictionary.rangeSeparator}
+        />
         <p className="event-summary">{eventSummary(event, locale)}</p>
 
         {visibleDetails.length > 0 ? (
@@ -296,10 +315,12 @@ function EventArchive({ events, dictionary, locale }: {
                   ) : null}
                 </div>
                 <h3>{eventTitle(event, locale)}</h3>
-                <div className="event-date">
-                  <time dateTime={event.date}>{formatDate(event.date, locale)}</time>
-                  {event.endDate && <> {dictionary.rangeSeparator} <time dateTime={event.endDate}>{formatDate(event.endDate, locale)}</time></>}
-                </div>
+                <EventDateRange
+                  date={event.date}
+                  endDate={event.endDate}
+                  locale={locale}
+                  separator={dictionary.rangeSeparator}
+                />
                 <button
                   type="button"
                   className="event-preview-open"

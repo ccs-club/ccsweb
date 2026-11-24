@@ -100,6 +100,15 @@ for (const locale of ["en", "mn"] as const) {
       await selectedTrack.focus();
       await page.keyboard.press("Home");
       await expect.poll(() => selectedTrack.evaluate((track) => track.scrollLeft)).toBeLessThan(40);
+
+      await selected.locator(".facebook-post-read").first().click();
+      const postDialog = page.locator(".post-details-dialog");
+      await expect(postDialog).toBeVisible();
+      await expect(postDialog.locator(".post-dialog-message")).toContainText("Long selected-post detail 32.");
+      await page.keyboard.press("Escape");
+      await expect(postDialog).not.toBeVisible();
+
+      await selectedTrack.focus();
       await page.keyboard.press("ArrowRight");
       await expect.poll(() => selectedTrack.evaluate((track) => track.scrollLeft)).toBeGreaterThan(100);
 

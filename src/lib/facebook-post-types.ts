@@ -13,15 +13,25 @@ export function isFacebookInfoPost(post: FacebookPost): boolean {
   return INFO_POST_MARKER.test(post.message);
 }
 
+/** Overlays saved selections with live Page updates when available so both sections agree. */
+export function syncSelectedFacebookPosts(
+  selectedPosts: FacebookPost[],
+  recentPagePosts: FacebookPost[],
+): FacebookPost[] {
+  if (recentPagePosts.length === 0) return selectedPosts;
+  const latestById = new Map(recentPagePosts.map((post) => [post.id, post]));
+  return selectedPosts
+    .map((selectedPost) => latestById.get(selectedPost.id) ?? selectedPost)
+    .sort((a, b) => b.createdTime.localeCompare(a.createdTime));
+}
+
 export function getInformationFacebookPosts(
   selectedPosts: FacebookPost[],
   recentPagePosts: FacebookPost[],
 ): FacebookPost[] {
-  const latestById = new Map(recentPagePosts.map((post) => [post.id, post]));
   const posts = new Map<string, FacebookPost>();
 
-  for (const selectedPost of selectedPosts) {
-    const post = latestById.get(selectedPost.id) ?? selectedPost;
+  for (const post of syncSelectedFacebookPosts(selectedPosts, recentPagePosts)) {
     posts.set(post.id, post);
   }
   for (const post of recentPagePosts) posts.set(post.id, post);
